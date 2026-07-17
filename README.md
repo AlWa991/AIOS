@@ -1,8 +1,11 @@
 # AIOS — Personal AI Operating System
 
-AIOS is a long-lived personal AI Operating System: a single conversational
-**Brain Agent** that unifies personal and company knowledge, memory, background
-agents, events, and integrations — model-agnostic and voice-first.
+AIOS is a **cognitive operating system**: a single conversational
+**Brain Agent** — acting as a trusted Chief Operating Officer — that unifies
+personal and company knowledge, memory, background agents, events, and
+integrations. Model-agnostic, voice-first. Its purpose is reducing cognitive
+load and increasing strategic capacity
+([ADR-0004](20-decisions/adr-0004-cognitive-load-as-primary-criterion.md)).
 
 **This repository is not primarily source code.** It is the single source of
 truth: a Product Handbook and Architecture Handbook, built documentation-first.
@@ -32,8 +35,8 @@ Code exists only where a specification exists.
 
 | Item | State |
 |------|-------|
-| Handbook stage | **Stage 0 complete** — skeleton, entry points, glossary, ADR process |
-| Next | Stage 1 — Product Handbook (`00-product/`: scope, principles, refined vision & roadmap) |
+| Handbook stage | **Stage 1 complete** — Product Handbook (`00-product/`) active |
+| Next | Stage 2 — Architecture core (`10-architecture/`: overview, brain-agent, memory, runtime, model abstraction, security) |
 | Code | None yet — by design (Documentation First, [ADR-0001](20-decisions/adr-0001-documentation-first-development.md)) |
 
 ## Core Principles

@@ -47,8 +47,14 @@ conflict silently — flag it and propose an ADR.
 
 ## 4. Core Principles (Binding)
 
+**Primary evaluation criterion above all principles:** every decision must
+reduce the user's cognitive load or increase strategic capacity
+([ADR-0004](20-decisions/adr-0004-cognitive-load-as-primary-criterion.md)).
+AIOS is a cognitive operating system, not a coding assistant.
+
 Every architectural and product decision must be compatible with these
-principles. Full elaboration lives in `00-product/principles.md` (Stage 1).
+architecture principles. Full elaboration — including the product principles
+P1–P7 — lives in [`00-product/principles.md`](00-product/principles.md).
 
 1. **Documentation First** — no code without an existing spec ([ADR-0001](20-decisions/adr-0001-documentation-first-development.md))
 2. **AI First** — every artifact is written to be consumed by AI systems, humans second

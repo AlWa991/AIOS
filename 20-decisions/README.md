@@ -29,3 +29,4 @@ one thing future AI sessions cannot reconstruct from code or structure.
 | [0001](adr-0001-documentation-first-development.md) | Documentation-first development | accepted | 2026-07-17 |
 | [0002](adr-0002-english-as-handbook-language.md) | English as handbook language | accepted | 2026-07-17 |
 | [0003](adr-0003-agents-md-as-machine-entry-point.md) | AGENTS.md as machine entry point | accepted | 2026-07-17 |
+| [0004](adr-0004-cognitive-load-as-primary-criterion.md) | Cognitive load reduction as primary evaluation criterion | accepted | 2026-07-17 |

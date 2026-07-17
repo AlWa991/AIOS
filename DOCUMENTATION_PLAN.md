@@ -1,6 +1,6 @@
 # AIOS — Documentation Plan & Information Architecture
 
-> Status: ACCEPTED 2026-07-17 · Stage 0 completed 2026-07-17
+> Status: ACCEPTED 2026-07-17 · Stage 0 completed 2026-07-17 · Stage 1 completed 2026-07-17 (product framing: cognitive operating system, see ADR-0004)
 > This file is the master plan for building the AIOS handbook. It defines the
 > target structure, the purpose of every document, and the build order.
 > No document content is written until this plan is approved.
