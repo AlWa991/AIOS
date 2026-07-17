@@ -1,65 +1,43 @@
-# AIOS
+# AIOS — Personal AI Operating System
 
-AI OS
+AIOS is a long-lived personal AI Operating System: a single conversational
+**Brain Agent** that unifies personal and company knowledge, memory, background
+agents, events, and integrations — model-agnostic and voice-first.
 
-Vision
+**This repository is not primarily source code.** It is the single source of
+truth: a Product Handbook and Architecture Handbook, built documentation-first.
+Code exists only where a specification exists.
 
-AI OS ist kein klassischer KI-Agent und kein gewöhnliches Dashboard.
+> **AI systems:** your binding entry point is [`AGENTS.md`](AGENTS.md).
+> Read it before anything else.
 
-Es ist ein persönliches AI Operating System, das alle digitalen Arbeitsprozesse und persönlichen Informationen intelligent zusammenführt. Ziel ist es, den Benutzer von manueller Koordination, ständigem Kontextwechsel und repetitiven Entscheidungen zu entlasten.
+---
 
-Der Benutzer kommuniziert zukünftig hauptsächlich mit einem einzigen intelligenten Brain Agent. Dieser versteht die aktuelle Situation, kennt sämtliche Projekte, priorisiert Aufgaben, plant Ressourcen und koordiniert alle ausführenden Agenten.
+## Repository Map
 
-Dabei ist das System modellunabhängig aufgebaut. Claude, ChatGPT, Gemini oder zukünftige Modelle sind lediglich ausführende Intelligenzen. Das Betriebssystem selbst bleibt dauerhaft bestehen.
+| Location | Content |
+|----------|---------|
+| [`AGENTS.md`](AGENTS.md) | Binding contract & reading order for AI systems |
+| [`CLAUDE.md`](CLAUDE.md) | Thin Claude-specific entry point |
+| [`GLOSSARY.md`](GLOSSARY.md) | Canonical terminology |
+| [`00-product/`](00-product/) | Vision · principles · scope · roadmap |
+| [`10-architecture/`](10-architecture/) | System & component architecture |
+| [`20-decisions/`](20-decisions/README.md) | Architecture Decision Records (ADRs) |
+| [`30-specs/`](30-specs/) | Precise component specifications |
+| [`40-operations/`](40-operations/) | Runbooks & operations (post-code) |
+| [`50-meta/`](50-meta/documentation-guide.md) | Documentation conventions & templates |
+| [`DOCUMENTATION_PLAN.md`](DOCUMENTATION_PLAN.md) | Master plan for building this handbook |
 
-⸻
+## Status
 
-Langfristiges Ziel
+| Item | State |
+|------|-------|
+| Handbook stage | **Stage 0 complete** — skeleton, entry points, glossary, ADR process |
+| Next | Stage 1 — Product Handbook (`00-product/`: scope, principles, refined vision & roadmap) |
+| Code | None yet — by design (Documentation First, [ADR-0001](20-decisions/adr-0001-documentation-first-development.md)) |
 
-Das AI OS entwickelt sich zum zentralen digitalen Betriebssystem des Benutzers.
+## Core Principles
 
-Es verbindet unter anderem:
-
-* Projekte
-* Kunden
-* GitHub-Repositories
-* Notion
-* Outlook
-* Gmail
-* Kalender
-* Meeting-Notizen
-* Sprachaufzeichnungen
-* Dokumente
-* Wissensdatenbanken
-* KI-Agenten
-* lokale Anwendungen
-* Cloud-Systeme
-
-Alle Informationen werden intelligent miteinander verknüpft.
-
-⸻
-
-Grundidee
-
-Der Benutzer soll möglichst wenig klicken.
-
-Stattdessen erfolgt die Interaktion hauptsächlich über Sprache.
-
-Der Brain Agent entscheidet selbstständig:
-
-* welche Informationen benötigt werden,
-* welche Agenten gestartet werden,
-* welches KI-Modell sinnvoll ist,
-* welche Priorität einzelne Aufgaben besitzen,
-* wann Rückfragen notwendig sind,
-* wann Ergebnisse präsentiert werden.
-
-⸻
-
-Zielbild
-
-Der Benutzer arbeitet nicht mehr mit einzelnen Anwendungen.
-
-Er arbeitet ausschließlich mit seinem persönlichen AI Operating System.
-
-Dieses Betriebssystem übernimmt Planung, Organisation, Kommunikation, Wissensmanagement und Agentenkoordination und entwickelt sich kontinuierlich gemeinsam mit seinem Benutzer weiter.
+Documentation First · AI First · Event Driven · Service Oriented ·
+Model Agnostic · Voice First · Knowledge Centric · Memory Native
+— binding, see [AGENTS.md §4](AGENTS.md).

@@ -1,6 +1,6 @@
 # AIOS — Documentation Plan & Information Architecture
 
-> Status: PROPOSED · 2026-07-17
+> Status: ACCEPTED 2026-07-17 · Stage 0 completed 2026-07-17
 > This file is the master plan for building the AIOS handbook. It defines the
 > target structure, the purpose of every document, and the build order.
 > No document content is written until this plan is approved.
@@ -139,8 +139,19 @@ Per component, immediately before building it: spec in `30-specs/`, decisions as
 
 ---
 
-## 5. Open Decisions (need Alex's call)
+## 5. Decisions (resolved 2026-07-17)
 
-1. **English confirmed** for all handbook docs? (Recommended; German summaries on demand.)
-2. Keep repo **docs-only** until Stage 2 is done, or allow code earlier?
-3. `AGENTS.md` + thin `CLAUDE.md` (recommended, multi-model) vs. `CLAUDE.md` only?
+1. **English** for all handbook documents → [ADR-0002](20-decisions/adr-0002-english-as-handbook-language.md)
+2. **Documentation-first:** code only after its spec exists → [ADR-0001](20-decisions/adr-0001-documentation-first-development.md)
+3. **AGENTS.md** as primary machine entry point, CLAUDE.md thin → [ADR-0003](20-decisions/adr-0003-agents-md-as-machine-entry-point.md)
+
+## 6. Binding Architecture Principles (set by Alex, 2026-07-17)
+
+Documentation First · AI First · Event Driven · Service Oriented ·
+Model Agnostic · Voice First · Knowledge Centric · Memory Native
+
+Recorded in [AGENTS.md §4](AGENTS.md); to be elaborated in
+`00-product/principles.md` (Stage 1). AIOS system surface named by Alex:
+Personal Knowledge System, company knowledge, Agent Runtime, Voice Interface,
+Memory Engine, Knowledge Graph, Event System, Dashboard, integrations,
+Multi-LLM orchestration — all captured in [GLOSSARY.md](GLOSSARY.md).

@@ -1,3 +1,13 @@
+---
+status: draft
+owner: alex
+last_updated: 2026-07-17
+---
+
+> **Migration debt:** German seed document, moved unchanged from `ROADMAP.md`.
+> Will be rewritten in English with entry/exit criteria during Stage 1
+> (see [ADR-0002](../20-decisions/adr-0002-english-as-handbook-language.md)).
+
 Entwicklungs-Roadmap
 
 Phase 1 – Fundament

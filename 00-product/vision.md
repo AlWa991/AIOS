@@ -1,3 +1,12 @@
+---
+status: draft
+owner: alex
+last_updated: 2026-07-17
+---
+
+> **Migration debt:** German seed document, moved unchanged from `Vision.md`.
+> Will be rewritten in English during Stage 1 (see [ADR-0002](../20-decisions/adr-0002-english-as-handbook-language.md)).
+
 Produktvision
 
 Mission
