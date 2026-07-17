@@ -1,8 +1,12 @@
 # 10-architecture
 
-Architecture Handbook: system overview and component docs. Empty until Stage 2
-(see [DOCUMENTATION_PLAN.md](../DOCUMENTATION_PLAN.md)). New docs start from
+Architecture Handbook. New docs start from
 [`../50-meta/templates/component.md`](../50-meta/templates/component.md).
 
-Planned: overview · brain-agent · memory-system · agent-runtime ·
-model-abstraction · integrations · security-and-privacy · tech-stack.
+- [`domain-model.md`](domain-model.md) — the domain architecture: seven bounded
+  contexts along the cognitive loop (draft, pending ADR-0013)
+
+Planned component docs (one per context, after ADR-0013 acceptance):
+perception · identity · memory · situation · deliberation · execution ·
+interaction — plus platform docs: model-abstraction · event-backbone ·
+security-and-privacy · tech-stack.
