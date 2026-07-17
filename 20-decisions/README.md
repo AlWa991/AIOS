@@ -39,3 +39,5 @@ one thing future AI sessions cannot reconstruct from code or structure.
 | [0011](adr-0011-situation-model-and-interface-projections.md) | Situation Model as core; interfaces as projections | proposed | 2026-07-17 |
 | [0012](adr-0012-action-reversibility-classes.md) | Action reversibility classes instead of absolute reversibility | proposed | 2026-07-17 |
 | [0013](adr-0013-seven-context-domain-architecture.md) | Seven-context domain architecture | proposed | 2026-07-17 |
+| [0014](adr-0014-goals-as-directive-hierarchy.md) | Goals as directive hierarchy inside Deliberation | proposed | 2026-07-17 |
+| [0015](adr-0015-time-as-cross-cutting-dimension.md) | Time as cross-cutting dimension with platform conventions | proposed | 2026-07-17 |

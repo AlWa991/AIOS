@@ -110,14 +110,14 @@ API of this system** — schemas are versioned and evolve additively only.
 | Aspect | Definition |
 |---|---|
 | **Purpose** | The COO cognition: from awareness to choice. The durable domain layer of ADR-0009. |
-| **Responsibilities** | Intention intake and decomposition (intentions → plans → tasks, P7); continuous prioritization; decision-point protocol (framing genuine trade-offs for the user, P3); recommendation and challenge generation (COO mode) and reflection outputs (Coach mode); arbitration of the four behavioral modes; model-selection *policy* (which class of task gets which class of model). |
-| **Owns** | Intentions, plans, tasks, priority state, decision records (requested → made), suggestions/reflections. |
+| **Responsibilities** | Stewardship of the **directive hierarchy: goals → intentions → plans → tasks** (ADR-0014); intention intake and decomposition (P7); continuous prioritization *against goals*; decision-point protocol (framing genuine trade-offs for the user, P3); recommendation and challenge generation (COO mode) and reflection outputs incl. goal progress and goal drift (Coach mode); arbitration of the four behavioral modes; model-selection *policy* (which class of task gets which class of model). |
+| **Owns** | Goals (with version history), intentions, plans, tasks, priority state, decision records (requested → made), suggestions/reflections. |
 | **Never owns** | Execution mechanics (Execution); conversation rendering (Interaction); storage of history (Memory). |
 | **Public contracts** | `IntentionIntake` (goal in, plan out); `PriorityQuery` (current ranked focus); `DecisionQueue` (open decisions, framed with evidence). |
-| **Publishes** | `plan.created`, `task.ready`, `priority.changed`, `decision.requested`, `decision.made`, `suggestion.created`. |
+| **Publishes** | `goal.created/revised/achieved/abandoned`, `plan.created`, `task.ready`, `priority.changed`, `decision.requested`, `decision.made`, `suggestion.created`. |
 | **Subscribes to** | `situation.changed`, `task.completed/blocked/failed`, `interaction.user_decision`, `coverage.gap.detected`, `contradiction.detected`. |
 | **Dependencies** | Situation (`SituationQuery`), Memory (`Recall` for evidence), Identity (`TrustQuery`), Model Abstraction Layer. |
-| **Invariants** | Every task traces to an intention. Every autonomous choice above the gate threshold produces a decision record. Every recommendation cites its evidence (Situation/Memory references) — no unexplainable advice. Coach-mode output is batched into reflection contexts, never injected inline (ADR-0011). |
+| **Invariants** | **Goals are user-sovereign: AIOS proposes goal changes, only the user decides them** (ADR-0014). Every intention traces to a goal or is explicitly marked ad-hoc; every task traces to an intention. Goal revisions are versioned events — goal-drift history is Coach-mode material. Every autonomous choice above the gate threshold produces a decision record. Every recommendation cites its evidence (Situation/Memory references) and the goals it serves — no unexplainable advice. Coach-mode output is batched into reflection contexts, never injected inline (ADR-0011). |
 | **Scalability concerns** | Continuous LLM-based prioritization is too expensive — hybrid: cheap heuristics for ranking stability, inference only on significant `situation.changed` deltas. |
 
 ### 2.6 Execution
@@ -186,6 +186,9 @@ Observability.
 | Uncertainty | Memory (belief confidence) + Situation (freshness/coverage) | Two distinct kinds — deliberately not unified |
 | Reversibility | Execution (classification + gate) | Classes declared per action in Perception connector specs (ADR-0012) |
 | Version History | Platform event log + Memory versioning | Never a separate Audit context |
+| Goals / Objectives / Success metrics | Deliberation (directive hierarchy) | User-sovereign; versioned; every priority cites goals (ADR-0014) |
+| Values / personal development themes | Personal Model (Identity self + Memory) | Values inform goals; goals drive priorities — deliberate split (ADR-0014) |
+| Time | Cross-cutting dimension, platform conventions | One clock, UTC, bitemporality, horizon taxonomy, scheduler-as-event-source (ADR-0015); each context applies its own temporal semantics |
 
 ## 5. Proposed ADR Amendments
 
@@ -206,6 +209,29 @@ module would fuse the two most complex concerns of the system.
 
 Both amendments are folded into ADR-0013 (domain architecture) rather than
 separate ADRs, since ADR-0008 is still `proposed`.
+
+## 5a. Temporal Model (ADR-0015)
+
+Time is a **dimension, not a domain**. A central "time module" would be a
+god-abstraction, because temporal semantics differ per context: Memory needs
+**bitemporality** (valid time vs transaction time — "X works at Y since 2024,
+known since 2026-07"), Situation needs freshness, Deliberation needs horizons
+and deadlines, Execution needs timeouts and ETAs. But fully ad-hoc time per
+context would fragment reasoning. Resolution — **platform conventions, defined
+once, applied everywhere**:
+
+1. **One clock, UTC internally**; event-log timestamps are normative.
+2. **Bitemporal pattern** (`valid_from/valid_to` + `recorded_at`) specified
+   once, reused by Memory assertions and Identity evolution. This is also the
+   defense against semantic drift over years (renamed projects, pivoted
+   companies): old assertions stay true *for their validity interval*.
+3. **Shared horizon taxonomy** (`now · today · week · quarter · year`) so
+   Deliberation horizons, Situation's "now" boundary, and Coach review cycles
+   speak the same language.
+4. **Time enters the system as events**: a platform Scheduler emits scheduled
+   triggers (follow-ups, briefing times, review cadences) onto the event
+   backbone. Consequence with ADR-0007: replays are deterministic and the
+   entire cognitive loop is testable under a simulated clock.
 
 ## 6. Scenario Validation
 
@@ -277,3 +303,37 @@ separate ADRs, since ADR-0008 is still `proposed`.
 **Verdict:** no redesign required after review; the review hardened invariants
 rather than moving boundaries. The architecture is the smallest set of
 contexts in which every cognitive responsibility has exactly one owner.
+
+## 8. The Ten-Year Test
+
+*"Could this architecture still support AIOS after ten years of accumulated
+memory, projects, relationships and decisions?"*
+
+**Yes — conditionally.** The properties that make it possible:
+
+1. **Append-only event log + rebuildable projections** (ADR-0007, 0011): state
+   never rots; any future need can build a new projection over the full
+   history; migration = replay, not surgery.
+2. **Contract boundaries with named extraction seams** (ADR-0006, 0008, 0009):
+   every scaling pressure identified so far (pgvector recall, flaky
+   connectors, ML-heavy resolution, adapter churn) has a designated seam.
+3. **Versioned, bitemporal assertions with confidence** (ADR-0012, 0015):
+   knowledge may be wrong and corrected without loss; semantic drift over
+   years is representable instead of destructive.
+4. **Model agnosticism** (A5, ADR-0009): the intelligence is replaceable; the
+   accumulated corpus of events, knowledge, decisions, and goals is the asset
+   that compounds.
+
+The two conditions — decade risks that are **operational policies, not
+structure**, and fail if they remain prose:
+
+- **Retrieval quality decay**: recall precision drops as the corpus grows.
+  The forgetting/compaction policy (A8) must be *built* in Phase 3, not
+  postulated. Storage is a non-issue at this scale; relevance is the issue.
+- **Event schema drift**: replaying ten-year-old events requires a schema
+  registry and upcasters from day one. Additive-only evolution is a discipline
+  that must be enforced by tooling.
+
+No architecture survives ten years unamended. This one is built to be amended
+in an orderly way — via contracts, projections, and superseding ADRs — rather
+than to pretend it will never change.
