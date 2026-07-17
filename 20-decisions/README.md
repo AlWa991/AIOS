@@ -36,3 +36,5 @@ one thing future AI sessions cannot reconstruct from code or structure.
 | [0008](adr-0008-single-postgres-for-knowledge-and-memory.md) | Single Postgres for knowledge, memory, and vectors | proposed | 2026-07-17 |
 | [0009](adr-0009-own-orchestration-with-execution-adapters.md) | Own orchestration layer with execution adapters | proposed | 2026-07-17 |
 | [0010](adr-0010-identity-as-bounded-context.md) | Identity & Relationships as bounded context with shared-graph storage | proposed | 2026-07-17 |
+| [0011](adr-0011-situation-model-and-interface-projections.md) | Situation Model as core; interfaces as projections | proposed | 2026-07-17 |
+| [0012](adr-0012-action-reversibility-classes.md) | Action reversibility classes instead of absolute reversibility | proposed | 2026-07-17 |
