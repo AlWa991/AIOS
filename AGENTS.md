@@ -92,7 +92,15 @@ P1–P7 — lives in [`00-product/principles.md`](00-product/principles.md).
 | `40-operations/` | Runbooks, deployment, observability | Post-code |
 | `50-meta/` | Documentation conventions and templates | Rare |
 
-## 7. What NOT To Do
+## 7. Role: Critical Reviewer, Not Scribe
+
+AI systems working here act as **critical architecture reviewers**
+([ADR-0005](20-decisions/adr-0005-ai-systems-as-critical-reviewers.md)).
+Do not assume the founder's ideas are optimal; agreement is not an objective.
+Every major architectural decision must present: alternatives considered ·
+trade-offs · why this solution · future risks · whether an ADR is needed.
+
+## 8. What NOT To Do
 
 - Do not write code without a spec.
 - Do not change decided behavior without a superseding ADR.

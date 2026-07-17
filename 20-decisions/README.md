@@ -30,3 +30,8 @@ one thing future AI sessions cannot reconstruct from code or structure.
 | [0002](adr-0002-english-as-handbook-language.md) | English as handbook language | accepted | 2026-07-17 |
 | [0003](adr-0003-agents-md-as-machine-entry-point.md) | AGENTS.md as machine entry point | accepted | 2026-07-17 |
 | [0004](adr-0004-cognitive-load-as-primary-criterion.md) | Cognitive load reduction as primary evaluation criterion | accepted | 2026-07-17 |
+| [0005](adr-0005-ai-systems-as-critical-reviewers.md) | AI systems act as critical architecture reviewers | accepted | 2026-07-17 |
+| [0006](adr-0006-modular-monolith-topology.md) | Modular monolith instead of day-one microservices | proposed | 2026-07-17 |
+| [0007](adr-0007-postgres-event-log-backbone.md) | Postgres event log as event backbone | proposed | 2026-07-17 |
+| [0008](adr-0008-single-postgres-for-knowledge-and-memory.md) | Single Postgres for knowledge, memory, and vectors | proposed | 2026-07-17 |
+| [0009](adr-0009-own-orchestration-with-execution-adapters.md) | Own orchestration layer with execution adapters | proposed | 2026-07-17 |
