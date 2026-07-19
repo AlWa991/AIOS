@@ -1,5 +1,5 @@
 ---
-status: draft
+status: approved
 owner: alex
 last_updated: 2026-07-19
 ---
@@ -7,7 +7,7 @@ last_updated: 2026-07-19
 # Spec: Walking Skeleton — one day through the cognitive loop
 
 - **Architecture doc:** [../10-architecture/domain-model.md](../10-architecture/domain-model.md)
-- **Constraining ADRs:** 0006 (modular monolith), 0007 (Postgres event log), 0008 (single Postgres), 0009 (adapters), 0011 (projections), 0012 (reversibility), 0013 (seven contexts), 0014 (goals), 0015 (time), 0016 (TypeScript)
+- **Constraining ADRs:** 0006 (modular monolith), 0007 (Postgres event log), 0008 (single Postgres), 0009 (adapters), 0011 (projections), 0012 (reversibility), 0013 (seven contexts), 0014 (goals), 0015 (time), 0016 (TypeScript), 0017 (Situation = sole read surface)
 
 ## Purpose & Scope
 
@@ -16,10 +16,15 @@ platform layer** on one flow:
 
 > Day starts → Perception captures (mocked) calendar/email/GitHub data →
 > Identity resolves entities → Memory records episodes → Situation folds the
-> current state → Deliberation produces goal-cited recommendations →
-> Interaction renders a Morning Briefing (CLI) → Dashboard serves the **same**
-> Situation Model → user approves one recommendation → Execution runs a mock
-> adapter → result flows back into Memory/Situation.
+> current state → Deliberation produces goal-cited recommendations **that fold
+> back into the Situation Model via events** → Interaction renders a Morning
+> Briefing (CLI) and the Dashboard serves JSON — **both reading exclusively
+> `Situation.current()`** → user approves one recommendation → Execution runs
+> a mock adapter → result flows back into Memory/Situation.
+
+**Canonical pipeline (ADR-0017):** Perception → Identity → Memory →
+Situation ⇄ Deliberation. `Situation.current()` is the sole read surface;
+everything downstream of it is pure presentation with zero business logic.
 
 **Goal is learning, not features.** Every element exists to validate an
 architectural decision; anything that doesn't is out of scope.
@@ -76,12 +81,18 @@ interface Identity { resolve(mention: Mention): Promise<EntityRef>; }
 // contracts/memory.ts
 interface Memory { recall(q: { entityIds?: string[]; horizon?: Horizon; text?: string }): Promise<Episode[]>; }
 
-// contracts/situation.ts — consumed by BOTH briefing and dashboard
+// contracts/situation.ts — the SOLE read surface for all interfaces (ADR-0017)
 interface Situation { current(horizon: Horizon): Promise<SituationView>; }
-type SituationView = { asOf: string; items: SituationItem[]; coverage: CoverageNote[] };
+type SituationView = {
+  asOf: string;
+  items: SituationItem[];
+  recommendations: RecommendationView[];  // folded from deliberation events
+  coverage: CoverageNote[];
+};
+type RecommendationView = { id: string; rationale: string; goalIds: string[]; status: "open" | "approved" | "done" };
 
-// contracts/deliberation.ts
-interface Deliberation { recommendations(): Promise<Recommendation[]>; }
+// contracts/deliberation.ts — NO read contract for interfaces (ADR-0017);
+// recommendations travel via events into the Situation projection.
 type Recommendation = { id: string; rationale: string; goalIds: string[]; action?: ActionRequest };
 
 // contracts/execution.ts
@@ -125,9 +136,9 @@ interface Clock { now(): Date; }   // no context reads Date.now() directly (ADR-
 3. Identity consumer resolves mentions ("Eddy", "IMH") → entities + edges; unknown mentions create low-confidence entities (coverage material).
 4. Memory consumer records one episode per observation.
 5. Situation consumer folds events into `situation_items` with horizon tags; unresolved mentions surface as `coverage` notes (ADR-0011: uncertainty first-class).
-6. Deliberation (rule-based v1: deadline proximity × goal linkage) emits 3 `recommendation.created`, each citing ≥1 goal (ADR-0014 traceability).
-7. `aios brief` renders Markdown briefing from `Situation.current("today")` + recommendations; prose optionally via ModelPort (MockModel = deterministic template).
-8. `GET /situation?horizon=today` returns the byte-identical `SituationView` the briefing used. Static HTML renders it. **No second read path, no duplicated logic.**
+6. Deliberation (rule-based v1: deadline proximity × goal linkage) emits 3 `recommendation.created`, each citing ≥1 goal (ADR-0014 traceability); the Situation consumer folds them into `SituationView.recommendations` (ADR-0017).
+7. `aios brief` renders a Markdown briefing from `Situation.current("today")` **only** — no other context is read; prose optionally via ModelPort (MockModel = deterministic template).
+8. `GET /situation?horizon=today` returns the byte-identical `SituationView` the briefing used. Static HTML renders it. **One read surface, no duplicated logic.**
 9. `aios approve <rec-id>` → `approval.granted` → Execution checks reversibility class (compensable → allowed), runs MockEmailDraftAdapter → `action.completed` → Memory + Situation update.
 
 ## Error Handling
@@ -140,6 +151,7 @@ line (no silent skip — halting is honest). No other retry/fallback machinery.
 
 - [ ] Golden test: fixtures in → `briefing.md` matches committed golden file (simulated clock)
 - [ ] Same-model test: dashboard JSON deep-equals the `SituationView` used by the briefing
+- [ ] Renderer purity (ADR-0017): `apps/` imports only the Situation contract (read) and Interaction (render/input) — enforced by dependency-cruiser
 - [ ] Replay test: truncate `situation_items` + `goals_current`, replay event log → identical rows
 - [ ] Boundary test: dependency-cruiser reports zero cross-context imports
 - [ ] Clock test: no direct `Date.now()`/`new Date()` outside `platform/` (lint rule)
@@ -148,5 +160,6 @@ line (no silent skip — halting is honest). No other retry/fallback machinery.
 
 ## Open Questions
 
-- Confirm: code lives in this repo (monorepo with handbook) — proposed above, needs Alex's OK.
-- Confirm: skeleton stays fully deterministic (MockModel default); real LLM behind env flag only.
+None — monorepo colocation and fully deterministic skeleton approved by Alex
+2026-07-19; canonical-pipeline property added as ADR-0017. Spec status:
+**approved for implementation.**
