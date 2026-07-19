@@ -1,6 +1,6 @@
 # ADR-0015: Time as cross-cutting dimension with platform conventions
 
-- **Status:** proposed
+- **Status:** accepted
 - **Date:** 2026-07-17
 - **Deciders:** alex
 - **Related:** [ADR-0007](adr-0007-postgres-event-log-backbone.md), [ADR-0011](adr-0011-situation-model-and-interface-projections.md), [ADR-0013](adr-0013-seven-context-domain-architecture.md), [domain-model.md §5a](../10-architecture/domain-model.md)

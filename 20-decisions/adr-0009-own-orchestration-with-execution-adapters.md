@@ -1,6 +1,6 @@
 # ADR-0009: Own orchestration layer with execution adapters
 
-- **Status:** proposed
+- **Status:** accepted
 - **Date:** 2026-07-17
 - **Deciders:** alex
 - **Related:** [principles.md A4/A5, P7](../00-product/principles.md), [ADR-0006](adr-0006-modular-monolith-topology.md), [scope.md](../00-product/scope.md)

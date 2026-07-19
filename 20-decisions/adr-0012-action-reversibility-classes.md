@@ -1,6 +1,6 @@
 # ADR-0012: Action reversibility classes instead of absolute reversibility
 
-- **Status:** proposed
+- **Status:** accepted
 - **Date:** 2026-07-17
 - **Deciders:** alex
 - **Related:** [ADR-0007](adr-0007-postgres-event-log-backbone.md), [ADR-0010](adr-0010-identity-as-bounded-context.md), [roadmap.md Phase 7](../00-product/roadmap.md)

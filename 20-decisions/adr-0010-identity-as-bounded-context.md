@@ -1,6 +1,6 @@
 # ADR-0010: Identity & Relationships as bounded context with shared-graph storage
 
-- **Status:** proposed
+- **Status:** accepted
 - **Date:** 2026-07-17
 - **Deciders:** alex
 - **Related:** [ADR-0006](adr-0006-modular-monolith-topology.md), [ADR-0007](adr-0007-postgres-event-log-backbone.md), [ADR-0008](adr-0008-single-postgres-for-knowledge-and-memory.md), [principles.md A7](../00-product/principles.md), [user-and-jobs.md J1/J6](../00-product/user-and-jobs.md)

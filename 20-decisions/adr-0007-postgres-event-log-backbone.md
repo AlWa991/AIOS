@@ -1,6 +1,6 @@
 # ADR-0007: Postgres event log as event backbone
 
-- **Status:** proposed
+- **Status:** accepted
 - **Date:** 2026-07-17
 - **Deciders:** alex
 - **Related:** [ADR-0006](adr-0006-modular-monolith-topology.md), [ADR-0008](adr-0008-single-postgres-for-knowledge-and-memory.md), [principles.md A3/A8](../00-product/principles.md)

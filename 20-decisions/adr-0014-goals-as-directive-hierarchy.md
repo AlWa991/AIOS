@@ -1,6 +1,6 @@
 # ADR-0014: Goals as directive hierarchy inside Deliberation
 
-- **Status:** proposed
+- **Status:** accepted
 - **Date:** 2026-07-17
 - **Deciders:** alex
 - **Related:** [ADR-0004](adr-0004-cognitive-load-as-primary-criterion.md), [ADR-0011](adr-0011-situation-model-and-interface-projections.md), [ADR-0013](adr-0013-seven-context-domain-architecture.md), [domain-model.md](../10-architecture/domain-model.md)

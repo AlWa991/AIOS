@@ -1,6 +1,6 @@
 # ADR-0008: Single Postgres for knowledge, memory, and vectors
 
-- **Status:** proposed
+- **Status:** accepted
 - **Date:** 2026-07-17
 - **Deciders:** alex
 - **Related:** [ADR-0006](adr-0006-modular-monolith-topology.md), [ADR-0007](adr-0007-postgres-event-log-backbone.md), [principles.md A7/A8](../00-product/principles.md), [GLOSSARY.md](../GLOSSARY.md)

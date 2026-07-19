@@ -1,6 +1,6 @@
 # ADR-0006: Modular monolith instead of day-one microservices
 
-- **Status:** proposed
+- **Status:** accepted
 - **Date:** 2026-07-17
 - **Deciders:** alex
 - **Related:** [principles.md A3/A4](../00-product/principles.md), [ADR-0004](adr-0004-cognitive-load-as-primary-criterion.md)

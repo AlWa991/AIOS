@@ -1,6 +1,6 @@
 # ADR-0011: Situation Model as core; interfaces as projections
 
-- **Status:** proposed
+- **Status:** accepted
 - **Date:** 2026-07-17
 - **Deciders:** alex
 - **Related:** [ADR-0007](adr-0007-postgres-event-log-backbone.md), [ADR-0006](adr-0006-modular-monolith-topology.md), [vision.md](../00-product/vision.md), [scope.md](../00-product/scope.md)
