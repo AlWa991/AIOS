@@ -1,0 +1,26 @@
+[
+  {
+    "externalId": "mail-1",
+    "title": "AIOS walking skeleton: deployment question",
+    "body": "Can you confirm the docker-compose setup for the AIOS walking skeleton before Monday?",
+    "from": "Eddy",
+    "mentions": ["Eddy"],
+    "horizon": "today"
+  },
+  {
+    "externalId": "mail-2",
+    "title": "IMH: updated sample data for classification",
+    "body": "New Excel exports attached, please verify against LVGBT thresholds.",
+    "from": "Frau Berger",
+    "mentions": ["IMH", "Frau Berger"],
+    "horizon": "today"
+  },
+  {
+    "externalId": "mail-3",
+    "title": "Invoice reminder Q3",
+    "body": "Reminder to send the D&W consulting invoice for Q3.",
+    "from": "buchhaltung@dw-itconsulting.de",
+    "mentions": ["D&W"],
+    "horizon": "week"
+  }
+]

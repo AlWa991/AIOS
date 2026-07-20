@@ -1,0 +1,23 @@
+[
+  {
+    "externalId": "pr-42",
+    "title": "PR #42: AIOS walking skeleton — event log + projections",
+    "body": "Adds append-only event log, consumer cursors and situation projection.",
+    "mentions": ["Eddy"],
+    "horizon": "today"
+  },
+  {
+    "externalId": "pr-43",
+    "title": "PR #43: IMH classifier — DepV threshold fix",
+    "body": "Fixes DK III boundary handling for PAK/PCB.",
+    "mentions": ["IMH"],
+    "horizon": "today"
+  },
+  {
+    "externalId": "issue-7",
+    "title": "Issue #7: dashboard health endpoint flaky",
+    "body": "Reported by external contributor mika-dev, needs triage.",
+    "mentions": ["mika-dev"],
+    "horizon": "week"
+  }
+]

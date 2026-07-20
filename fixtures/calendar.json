@@ -1,0 +1,34 @@
+[
+  {
+    "externalId": "cal-1",
+    "title": "Standup with Eddy",
+    "body": "Daily sync on current blockers.",
+    "mentions": ["Eddy"],
+    "occursAt": "2026-07-19T07:30:00.000Z",
+    "horizon": "today"
+  },
+  {
+    "externalId": "cal-2",
+    "title": "IMH follow-up call",
+    "body": "Discuss lab classification rollout and next contract phase with IMH.",
+    "mentions": ["IMH", "Frau Berger"],
+    "occursAt": "2026-07-19T08:00:00.000Z",
+    "horizon": "today"
+  },
+  {
+    "externalId": "cal-3",
+    "title": "Deep work block",
+    "body": "Focused implementation time, no meetings.",
+    "mentions": [],
+    "occursAt": "2026-07-19T12:00:00.000Z",
+    "horizon": "today"
+  },
+  {
+    "externalId": "cal-4",
+    "title": "Quarterly planning D&W",
+    "body": "Revenue targets and pipeline review.",
+    "mentions": ["Eddy", "D&W"],
+    "occursAt": "2026-07-23T09:00:00.000Z",
+    "horizon": "week"
+  }
+]

@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>AIOS — Situation</title>
+  <style>
+    body { font-family: ui-monospace, monospace; margin: 2rem; background: #0f1115; color: #d8dee9; }
+    h1 { font-size: 1.2rem; }
+    h2 { font-size: 1rem; margin-top: 1.5rem; color: #88c0d0; }
+    li { margin: 0.2rem 0; }
+    .status { color: #a3be8c; }
+    .muted { color: #7b8394; }
+  </style>
+</head>
+<body>
+  <h1>AIOS — Situation (today)</h1>
+  <p class="muted" id="asof"></p>
+  <h2>Items</h2><ul id="items"></ul>
+  <h2>Recommendations</h2><ul id="recs"></ul>
+  <h2>Coverage gaps</h2><ul id="coverage"></ul>
+  <h2>Completed</h2><ul id="completions"></ul>
+  <script>
+    fetch("/situation?horizon=today")
+      .then((r) => r.json())
+      .then((view) => {
+        document.getElementById("asof").textContent = "as of " + view.asOf;
+        const add = (listId, text) => {
+          const li = document.createElement("li");
+          li.textContent = text;
+          document.getElementById(listId).appendChild(li);
+        };
+        view.items.forEach((i) =>
+          add("items", (i.occursAt ? i.occursAt.slice(11, 16) + " UTC — " : "") + "[" + i.kind + "] " + i.title + " (" + i.status + ")"));
+        view.recommendations.forEach((r) =>
+          add("recs", r.id + " — " + r.rationale + " [" + r.status + "]"));
+        view.coverage.forEach((c) => add("coverage", c.note));
+        view.completions.forEach((c) => add("completions", c.recommendationId + " — " + c.detail));
+      });
+  </script>
+</body>
+</html>
