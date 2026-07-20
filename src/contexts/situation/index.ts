@@ -23,13 +23,14 @@ async function fold(db: Db, event: StoredEvent, publish: boolean): Promise<void>
   if (event.type === "perception.observation.captured") {
     const p = event.payload;
     const id = `si-${p.source}-${p.externalId}`;
+    const status = p.status === "cancelled" ? "cancelled" : "open";
     await db.query(
       `INSERT INTO situation_items (id, kind, horizon, status, entity_ids, source_event_id, payload, updated_at)
-       VALUES ($1, $2, $3, 'open', '{}', $4, $5, $6)
-       ON CONFLICT (id) DO UPDATE SET payload = EXCLUDED.payload, updated_at = EXCLUDED.updated_at`,
-      [id, p.source, p.horizon, event.id, JSON.stringify({ title: p.title, body: p.body ?? "", occursAt: p.occursAt ?? null, from: p.from ?? null }), at],
+       VALUES ($1, $2, $3, $7, '{}', $4, $5, $6)
+       ON CONFLICT (id) DO UPDATE SET payload = EXCLUDED.payload, status = EXCLUDED.status, updated_at = EXCLUDED.updated_at`,
+      [id, p.source, p.horizon, event.id, JSON.stringify({ title: p.title, body: p.body ?? "", occursAt: p.occursAt ?? null, from: p.from ?? null }), at, status],
     );
-    changed.push({ itemId: id, kind: p.source as string, status: "open" });
+    changed.push({ itemId: id, kind: p.source as string, status });
   } else if (event.type === "identity.entity.resolved") {
     const p = event.payload;
     await db.query(

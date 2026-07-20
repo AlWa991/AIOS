@@ -43,3 +43,4 @@ one thing future AI sessions cannot reconstruct from code or structure.
 | [0015](adr-0015-time-as-cross-cutting-dimension.md) | Time as cross-cutting dimension with platform conventions | accepted | 2026-07-17 |
 | [0016](adr-0016-typescript-core-python-workers.md) | TypeScript as core language; Python limited to specialized workers | accepted | 2026-07-19 |
 | [0017](adr-0017-situation-model-as-sole-read-surface.md) | Situation Model as the sole read surface for all interfaces | accepted | 2026-07-19 |
+| [0018](adr-0018-slice-review-two-questions.md) | Every vertical slice must answer two questions | accepted | 2026-07-20 |

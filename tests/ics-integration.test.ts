@@ -102,6 +102,19 @@ describe("ICS calendar integration (spec-0002)", () => {
     expect(huber!.payload.status).toBe("cancelled");
   });
 
+  it("cancelled status reaches the Situation Model and the briefing", async () => {
+    const week = await runtime.situation.current("week");
+    const huber = week.items.find(
+      (i) => i.id === "si-calendar-aios-sample-0004@dw-itconsulting.de",
+    );
+    expect(huber).toBeDefined();
+    expect(huber!.status).toBe("cancelled");
+    if (huber!.horizon === "today") {
+      const brief = await runtime.interaction.brief();
+      expect(brief).toContain("(cancelled)");
+    }
+  });
+
   it("idempotency: same ICS twice emits 0 new events", async () => {
     const before = (await calendarObservations()).length;
     await runtime.interaction.startDay();

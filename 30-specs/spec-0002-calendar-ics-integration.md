@@ -114,3 +114,20 @@ proceed (partial ingest beats total failure).
 
 None — provider decision documented above; live-demo URL supplied by Alex
 after implementation.
+
+## Slice Review (ADR-0018)
+
+1. **New user capability:** the user's real calendar (any ICS source, e.g.
+   Outlook "Publish calendar") appears in the Morning Briefing and Dashboard
+   automatically — including recurring events, all-day events, cancellations,
+   and unknown meeting attendees surfacing as coverage gaps. No manual input.
+2. **Architecture learning:** real-world data entered the system with zero
+   changes to any bounded context (diff-proven — only a new Perception
+   adapter, one Perception-owned table, +6 additive registry lines). The
+   slice exposed one domain gap: the Situation fold did not propagate the
+   observation `status`, so cancellations never reached the briefing. Per
+   Alex's no-workaround rule the gap was fixed afterwards as a localized
+   Situation-only change (status now folds from the payload; replay stays
+   deterministic; no new cross-context dependencies, no contract change) —
+   confirming that domain gaps stay local instead of leaking across
+   boundaries.

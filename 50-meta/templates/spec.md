@@ -38,3 +38,8 @@ against. Use code blocks for schemas.>
 ## Open Questions
 
 - <question — must be empty before implementation starts>
+
+## Slice Review (fill at completion — ADR-0018)
+
+1. **New user capability:** <what can the user do now that was impossible before?>
+2. **Architecture learning:** <what did this slice prove, disprove, or expose?>
