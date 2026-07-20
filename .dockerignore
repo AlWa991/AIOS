@@ -1,0 +1,11 @@
+node_modules
+dist
+.git
+00-product
+10-architecture
+20-decisions
+30-specs
+40-operations
+50-meta
+Chathistory
+*.md
