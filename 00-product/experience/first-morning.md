@@ -1,6 +1,8 @@
 # The First Morning — Experience Design
 
-**Status:** Draft — awaiting Alex's approval
+**Status:** Accepted 2026-07-20 (Alex) — incl. four product adjustments: personal memory
+with provenance, willingness to disagree, conversation-first, radical honesty as permanent
+principle
 **Drives:** spec-0004
 **Rule:** The experience described here drives the implementation, not the other way around.
 
@@ -99,14 +101,45 @@ The briefing accepts answers. Minimal verb set for v1:
 
 | Alex says | AIOS does |
 |---|---|
-| "warum?" | Shows the reasoning behind one judgment. |
+| "warum?" / "erklär deine Begründung" | Shows the reasoning behind one judgment, including any memory it relied on. |
+| "zeig mir mehr" | Expands one item into its full context. |
 | "ignorier das" / "dauerhaft" | Moves item to ignorable; permanent → learning event. |
-| "das ist wichtiger als du denkst" | Promotes item; records correction as learning event. |
+| "das ist wichtiger als du denkst" / "das ist meine höchste Priorität" | Promotes item; records the stated priority as a learning event with provenance. |
+| "da bin ich anderer Meinung" | AIOS states its reasoning once, then yields; the overrule is recorded. |
 | "zeig mir die ignorierten" | Expands the ignorable list. |
 | names a task | AIOS confirms and surfaces the relevant context (handoff to work). |
 
-Every correction is a first-class learning event — the seed of the Coach loop. Corrections
-per week trending down = AIOS is learning.
+The briefing is not the product — it is the **beginning of a conversation**. Every item can
+naturally continue into dialogue. Every correction is a first-class learning event — the
+seed of the Coach loop. The briefing gets better because we talk, **not because
+configuration grows**. Corrections per week trending down = AIOS is learning.
+
+### AIOS remembers Alex, not just the world
+
+The briefing occasionally explains importance in the context of Alex's own goals,
+decisions and stated priorities:
+
+> „Du hast mir letzte Woche gesagt, das IMH-Angebot ist diesen Monat deine höchste
+> Priorität. Deshalb steht es heute vorne."
+
+This is what turns an intelligent filter into a long-term partner.
+
+**Hard rule — no memory, no claim:** every "you told me" MUST trace to a recorded
+event (who/when/what, per the ADR-0014 traceability invariant). A fabricated memory is
+the single worst trust failure this product can commit. If AIOS has no recorded basis,
+it argues from the situation alone.
+
+### AIOS is willing to disagree
+
+Alex does not just want prioritization — he wants judgment. If AIOS believes Alex is
+about to spend time on the wrong thing, it says so, with an impact comparison:
+
+> „Ich würde die Meeting-Vorbereitung hinter die Antwort an Dr. Weber stellen —
+> die verpasste Angebotsfrist heute wiegt schwerer."
+
+Rules of disagreement: state it once, give the reason and the comparison, then yield.
+Alex decides. An overrule is recorded as a learning event and never re-litigated the
+same day. This is the COO mode of AIOS.
 
 ### The one-question rule
 
@@ -119,6 +152,13 @@ goal linkage that triage needs.
 On the literal first morning, AIOS says what it is: early, seeing only calendar and email,
 not yet goals or projects — and asks its one question. It never fakes a maturity it
 does not have.
+
+### Radical honesty (permanent principle)
+
+The "Was ich nicht sehe" section is **never removed** — not in v1, not in v10. Trust is
+built as much by admitting uncertainty as by making good recommendations. When AIOS is
+unsure, it says so; when confidence is low, it explains *why* (thin data, stale source,
+conflicting signals). Honesty about limits is a core differentiator, not a beta apology.
 
 ---
 
@@ -141,3 +181,7 @@ does not have.
   tests assert structure, never wording.
 - Acknowledged/seen state and corrections need persistence — expected architecture
   learning: where does "what Alex already saw" live (Memory vs Situation)?
+- Stated priorities/goals and overrules become recorded events with provenance; briefing
+  memory citations must carry a reference to their source event (no memory, no claim).
+- Disagreement is a first-class Deliberation output (recommendation + impact comparison),
+  not prompt decoration.
