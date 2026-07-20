@@ -11,6 +11,9 @@ importers:
       fastify:
         specifier: ^5.2.0
         version: 5.10.0
+      node-ical:
+        specifier: ^0.27.0
+        version: 0.27.0
       node-pg-migrate:
         specifier: ^7.9.0
         version: 7.9.1(@types/pg@8.20.0)(pg@8.22.0)
@@ -693,6 +696,10 @@ packages:
     engines: {node: ^10 || ^12 || ^13.7 || ^14 || >=15.0.1}
     hasBin: true
 
+  node-ical@0.27.0:
+    resolution: {integrity: sha512-WYXDfh5cm4BnJNB1ZC5pSkMXUyBFjE31ni96HqOIImt80kVIa+gcHzWAxB5CUX4W0vg1Dv0Vy8EvGPEf3lwFXg==}
+    engines: {node: '>=22'}
+
   node-pg-migrate@7.9.1:
     resolution: {integrity: sha512-6z4OSN27ye8aYdX9ZU7NN2PTI5pOp34hTr+22Ej12djIYECq++gT7LPLZVOQXEeVCBOZQLqf87kC3Y36G434OQ==}
     engines: {node: '>=18.19.0'}
@@ -857,6 +864,10 @@ packages:
     engines: {node: '>=18.0.0', npm: '>=8.0.0'}
     hasBin: true
 
+  rrule-temporal@2.0.0:
+    resolution: {integrity: sha512-gKYHKNXiQ7G6eiv+y2FKF5AaXp7LTBhG2HM+tHqh3FufRD7vGMpmjaVjjJqN42UfDQjVBGS0aTS1NKcIEtDo+A==}
+    engines: {node: '>=20'}
+
   safe-regex2@5.1.1:
     resolution: {integrity: sha512-mOSBvHGDZMuIEZMdOz/aCEYDCv0E7nfcNsIhUF+/P+xC7Hyf3FkvymqgPbg9D1EdSGu+uKbJgy09K/RKKc7kJA==}
     hasBin: true
@@ -940,6 +951,15 @@ packages:
 
   teamcity-service-messages@0.1.14:
     resolution: {integrity: sha512-29aQwaHqm8RMX74u2o/h1KbMLP89FjNiMxD9wbF2BbWOnbM+q+d1sCEC+MqCc4QW3NJykn77OMpTFw/xTHIc0w==}
+
+  temporal-polyfill@0.3.2:
+    resolution: {integrity: sha512-TzHthD/heRK947GNiSu3Y5gSPpeUDH34+LESnfsq8bqpFhsB79HFBX8+Z834IVX68P3EUyRPZK5bL/1fh437Eg==}
+
+  temporal-spec@0.3.1:
+    resolution: {integrity: sha512-B4TUhezh9knfSIMwt7RVggApDRJZo73uZdj8AacL2mZ8RP5KtLianh2MXxL06GN9ESYiIsiuoLQhgVfwe55Yhw==}
+
+  temporal-spec@1.0.0:
+    resolution: {integrity: sha512-00Ahj1e1ifaERTMOIIGpOCdOo9IEk2m6GGSMedsn9a2SIsGLdOTbmME1Htv6IM82b6VHrzSUTIVc7YHy6hdhFQ==}
 
   thread-stream@4.2.0:
     resolution: {integrity: sha512-e2zZ96wSChazBsbENf/Pcm/4swHt2cEKQ92rhUjkL9GCKiTDJIaTBenjE/m9DXi0QBmTMDkFDdOomUy20A1tDQ==}
@@ -1627,6 +1647,11 @@ snapshots:
 
   nanoid@3.3.16: {}
 
+  node-ical@0.27.0:
+    dependencies:
+      rrule-temporal: 2.0.0
+      temporal-polyfill: 0.3.2
+
   node-pg-migrate@7.9.1(@types/pg@8.20.0)(pg@8.22.0):
     dependencies:
       glob: 11.0.3
@@ -1796,6 +1821,10 @@ snapshots:
       '@rollup/rollup-win32-x64-msvc': 4.62.2
       fsevents: 2.3.3
 
+  rrule-temporal@2.0.0:
+    dependencies:
+      temporal-spec: 1.0.0
+
   safe-regex2@5.1.1:
     dependencies:
       ret: 0.5.0
@@ -1857,6 +1886,14 @@ snapshots:
   tapable@2.3.3: {}
 
   teamcity-service-messages@0.1.14: {}
+
+  temporal-polyfill@0.3.2:
+    dependencies:
+      temporal-spec: 0.3.1
+
+  temporal-spec@0.3.1: {}
+
+  temporal-spec@1.0.0: {}
 
   thread-stream@4.2.0:
     dependencies:

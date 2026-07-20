@@ -29,6 +29,8 @@ export type RuntimeOptions = {
   clock?: Clock;
   fixturesDir?: string;
   db?: Db;
+  /** ICS subscription URL (AIOS_CALENDAR_ICS_URL). Set → real calendar adapter. */
+  calendarIcsUrl?: string;
 };
 
 export async function createRuntime(opts: RuntimeOptions = {}): Promise<Runtime> {
@@ -37,9 +39,10 @@ export async function createRuntime(opts: RuntimeOptions = {}): Promise<Runtime>
   const db = opts.db ?? createPool(databaseUrl);
   const clock = opts.clock ?? clockFromEnv(process.env);
   const fixturesDir = opts.fixturesDir ?? path.join(process.cwd(), "fixtures");
+  const calendarIcsUrl = opts.calendarIcsUrl ?? process.env.AIOS_CALENDAR_ICS_URL;
 
   const runner = new ConsumerRunner(db);
-  runner.register(createPerceptionConsumer(db, clock, fixturesDir));
+  runner.register(createPerceptionConsumer(db, clock, { fixturesDir, calendarIcsUrl }));
   runner.register(createIdentityConsumer(db, clock));
   runner.register(createMemoryConsumer(db, clock));
   runner.register(createSituationConsumer(db));

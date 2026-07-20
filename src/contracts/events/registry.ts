@@ -26,6 +26,12 @@ export const eventSchemas = {
     occursAt: z.string().optional(),
     horizon: horizonSchema,
     day: z.string(),
+    // Additive optional fields (spec-0002, calendar via ICS):
+    attendees: z.array(z.string()).optional(),
+    location: z.string().optional(),
+    allDay: z.boolean().optional(),
+    sourceUid: z.string().optional(),
+    status: z.enum(["confirmed", "cancelled"]).optional(),
   }),
   "identity.entity.resolved@1": z.object({
     mention: z.string(),
