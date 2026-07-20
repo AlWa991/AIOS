@@ -32,6 +32,9 @@ export const eventSchemas = {
     allDay: z.boolean().optional(),
     sourceUid: z.string().optional(),
     status: z.enum(["confirmed", "cancelled"]).optional(),
+    // Additive optional fields (spec-0003, email threads via .eml):
+    threadId: z.string().optional(),
+    messageCount: z.number().int().optional(),
   }),
   "identity.entity.resolved@1": z.object({
     mention: z.string(),

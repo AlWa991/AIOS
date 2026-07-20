@@ -31,6 +31,8 @@ export type RuntimeOptions = {
   db?: Db;
   /** ICS subscription URL (AIOS_CALENDAR_ICS_URL). Set → real calendar adapter. */
   calendarIcsUrl?: string;
+  /** Directory of RFC 822 .eml files (AIOS_EMAIL_EML_DIR). Set → real email adapter. */
+  emailEmlDir?: string;
 };
 
 export async function createRuntime(opts: RuntimeOptions = {}): Promise<Runtime> {
@@ -40,9 +42,10 @@ export async function createRuntime(opts: RuntimeOptions = {}): Promise<Runtime>
   const clock = opts.clock ?? clockFromEnv(process.env);
   const fixturesDir = opts.fixturesDir ?? path.join(process.cwd(), "fixtures");
   const calendarIcsUrl = opts.calendarIcsUrl ?? process.env.AIOS_CALENDAR_ICS_URL;
+  const emailEmlDir = opts.emailEmlDir ?? process.env.AIOS_EMAIL_EML_DIR;
 
   const runner = new ConsumerRunner(db);
-  runner.register(createPerceptionConsumer(db, clock, { fixturesDir, calendarIcsUrl }));
+  runner.register(createPerceptionConsumer(db, clock, { fixturesDir, calendarIcsUrl, emailEmlDir }));
   runner.register(createIdentityConsumer(db, clock));
   runner.register(createMemoryConsumer(db, clock));
   runner.register(createSituationConsumer(db));

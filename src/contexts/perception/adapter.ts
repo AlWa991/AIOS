@@ -22,6 +22,9 @@ export type Observation = {
   allDay?: boolean;
   sourceUid?: string;
   status?: "confirmed" | "cancelled";
+  /** Optional fields introduced by spec-0003 (additive, email thread shape). */
+  threadId?: string;
+  messageCount?: number;
 };
 
 export interface PerceptionAdapter {

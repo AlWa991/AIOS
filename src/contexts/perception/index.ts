@@ -6,11 +6,14 @@ import type { Consumer } from "../../platform/events/consumers.js";
 import type { PerceptionAdapter } from "./adapter.js";
 import { FixtureAdapter } from "./fixture-adapter.js";
 import { IcsCalendarAdapter } from "./ics-calendar-adapter.js";
+import { EmlDirAdapter } from "./eml-dir-adapter.js";
 
 export type PerceptionOptions = {
   fixturesDir: string;
   /** Set (AIOS_CALENDAR_ICS_URL) → real ICS adapter; unset → calendar fixture. */
   calendarIcsUrl?: string;
+  /** Set (AIOS_EMAIL_EML_DIR) → real .eml directory adapter; unset → email fixture. */
+  emailEmlDir?: string;
 };
 
 /** Perception: converts the outside world into observation events via adapters. */
@@ -19,7 +22,9 @@ export function createPerceptionConsumer(db: Db, clock: Clock, options: Percepti
     options.calendarIcsUrl
       ? new IcsCalendarAdapter(db, clock, options.calendarIcsUrl)
       : new FixtureAdapter("calendar", db, path.join(options.fixturesDir, "calendar.json")),
-    new FixtureAdapter("email", db, path.join(options.fixturesDir, "emails.json")),
+    options.emailEmlDir
+      ? new EmlDirAdapter(db, clock, options.emailEmlDir)
+      : new FixtureAdapter("email", db, path.join(options.fixturesDir, "emails.json")),
     new FixtureAdapter("github", db, path.join(options.fixturesDir, "github.json")),
   ];
   return {
