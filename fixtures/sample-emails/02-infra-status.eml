@@ -1,0 +1,22 @@
+Message-ID: <aios-mail-0002@dw-itconsulting.de>
+Date: Sun, 19 Jul 2026 09:05:00 +0200
+From: Eddy <eduard.dinges@dw-itconsulting.de>
+To: Alex <alex@dw-itconsulting.de>
+Subject: Infrastruktur-Status Juli
+MIME-Version: 1.0
+Content-Type: text/html; charset="utf-8"
+Content-Transfer-Encoding: 7bit
+
+<html>
+  <body>
+    <p>Hi Alex,</p>
+    <p>der <b>Monitoring-Umbau</b> auf dem VPS ist durch. Alle Services laufen
+    stabil, Uptime im Juli bisher <i>100 Prozent</i>.</p>
+    <ul>
+      <li>Postgres Backup: taeglich 03:00</li>
+      <li>Compose Healthchecks: aktiv</li>
+    </ul>
+    <p>Details im Dashboard: <a href="https://status.dw-itconsulting.de">Statusseite</a></p>
+    <p>Eddy</p>
+  </body>
+</html>

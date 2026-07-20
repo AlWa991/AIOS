@@ -1,0 +1,22 @@
+Message-ID: <aios-mail-0001@dw-itconsulting.de>
+Date: Sun, 19 Jul 2026 08:15:00 +0200
+From: Eddy <eduard.dinges@dw-itconsulting.de>
+To: Alex <alex@dw-itconsulting.de>
+Subject: AIOS deployment window on Monday
+MIME-Version: 1.0
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: 7bit
+
+Hi Alex,
+
+can we lock the deployment window for the AIOS walking skeleton on Monday
+between 09:00 and 11:00? I want to run the compose build once more on the
+VPS before we call it done.
+
+Cheers,
+Eddy
+
+--
+Eduard Dinges
+CTO, D&W IT Consulting
+https://dw-itconsulting.de
