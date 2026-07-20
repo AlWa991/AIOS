@@ -23,6 +23,6 @@ export async function freshDb(): Promise<Db> {
 export async function resetDb(db: Db): Promise<void> {
   await db.query(
     `TRUNCATE events, consumer_cursors, entities, entity_aliases, edges,
-             episodes, goals_current, situation_items RESTART IDENTITY`,
+             episodes, goals_current, situation_items, perception_watermarks RESTART IDENTITY`,
   );
 }
