@@ -24,6 +24,8 @@ services:
     environment:
       DATABASE_URL: postgres://aios:aios@postgres:5432/aios
       PORT: "3000"
+      # spec-0003: real email adapter reads the baked-in sample .eml set
+      AIOS_EMAIL_EML_DIR: /app/fixtures/sample-emails
     ports:
       - "3000:3000"
     healthcheck:
