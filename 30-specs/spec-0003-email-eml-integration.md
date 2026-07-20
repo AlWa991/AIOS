@@ -93,9 +93,33 @@ Per-file parse failures: skip + warn (partial ingest beats total failure).
 
 None.
 
-## Slice Review (fill at completion — ADR-0018)
+## Slice Review (ADR-0018)
 
-1. **New user capability:** <fill>
-2. **Architecture learning:** <fill>
-3. **Did any bounded context become weaker?** <fill>
-4. **Which quality metric should AIOS expose for its own understanding?** <fill>
+1. **New user capability:** real email (any mailbox exporting `.eml`)
+   becomes situational awareness: an N-message thread appears as ONE open
+   loop in briefing and dashboard, updated by the latest message — not N
+   rows of noise. Unknown senders surface as coverage gaps automatically.
+2. **Architecture learning:** unstructured data forced real normalization
+   *into* Perception (thread folding, quote/signature stripping) — and the
+   boundaries held again: zero changes to any other context, zero
+   migrations. But the slice exposed a blind spot in the additive-event
+   strategy: new optional payload fields (`threadId`, `messageCount`) are
+   silently dropped at the Situation fold's payload whitelist. **Additive ≠
+   automatically consumed** — schema evolution needs a consumption check,
+   not just a compatibility check.
+3. **Did any bounded context become weaker?** No boundary weakened — but
+   two tensions are now on record: (a) Perception is accumulating
+   normalization logic per source; acceptable while per-adapter, watch for
+   god-module growth. (b) The Identity boundary blocked body-text mention
+   matching (alias registry is Identity-internal, Perception cannot read
+   it) — the boundary held at the cost of capability; resolving it
+   (queryable alias contract vs. Identity-side body scanning) is a genuine
+   ADR candidate for a future slice, not a workaround.
+4. **Proposed quality metric — "Understanding Coverage":** per source:
+   (resolved mentions / total mentions) as resolution ratio, plus staleness
+   (time since last successful ingest). Both are already derivable from the
+   existing event log (`identity.entity.resolved` confidence ×
+   `observation.captured` counts) — no new data needed, only a projection.
+   This measures exactly what AIOS claims to provide: how much of the
+   user's world it actually understands, and how fresh that understanding
+   is. Candidate for a future slice as part of `SituationView.coverage`.
