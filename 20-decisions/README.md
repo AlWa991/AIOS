@@ -44,3 +44,4 @@ one thing future AI sessions cannot reconstruct from code or structure.
 | [0016](adr-0016-typescript-core-python-workers.md) | TypeScript as core language; Python limited to specialized workers | accepted | 2026-07-19 |
 | [0017](adr-0017-situation-model-as-sole-read-surface.md) | Situation Model as the sole read surface for all interfaces | accepted | 2026-07-19 |
 | [0018](adr-0018-slice-review-two-questions.md) | Every vertical slice must answer two questions | accepted | 2026-07-20 |
+| [0019](adr-0019-identity-owns-semantic-recognition.md) | Perception owns syntax; Identity owns meaning | accepted | 2026-07-20 |
