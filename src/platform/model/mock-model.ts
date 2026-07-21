@@ -25,7 +25,9 @@ export class MockModel implements ModelPort {
 
     const needsYou = candidates.map((item) => ({
       itemId: item.id,
-      reason: `${item.kind === "calendar" ? "Termin" : "Aufgabe"}: ${item.title}`,
+      reason: item.kind === "calendar"
+        ? `Termin${item.occursAt ? ` um ${item.occursAt.slice(11, 16)} UTC` : ""} — Anwesenheit oder Vorbereitung erforderlich.`
+        : `E-Mail oder GitHub-Item mit offenem Handlungsbedarf.`,
       citedPriorityIds: [] as string[],
     }));
 
@@ -52,17 +54,28 @@ export class MockModel implements ModelPort {
       itemIds: ignorableItems,
     };
 
-    // Blind spots from coverage notes
-    const blindSpots = situationView.coverage.map((c) => c.note);
-    if (blindSpots.length === 0) {
-      blindSpots.push("Notion und GitHub sind noch nicht verbunden; E-Mails erst seit heute 06:00. Dort können blinde Flecken liegen.");
+    // Blind spots: honest about data sources, not raw coverage note text
+    const blindSpots: string[] = [];
+    if (situationView.coverage.length > 0) {
+      const names = situationView.coverage.map((c) => `„${c.mention}"`).join(", ");
+      blindSpots.push(
+        `Personen ${names} nicht eindeutig erkannt — manuell prüfen falls relevant.`,
+      );
     }
+    blindSpots.push(
+      "Notion und GitHub sind noch nicht verbunden. E-Mails nur aus dem konfigurierten Verzeichnis. Dort können blinde Flecken liegen.",
+    );
 
     const itemCount = situationView.items.length;
+    const needsYouCount = candidates.length;
     const openingLine =
       itemCount === 0
         ? "Ruhiger Start — noch keine neuen Einträge."
-        : `${itemCount === 1 ? "Ein Punkt" : `${itemCount} Punkte`} auf dem Radar — ${candidates.length > 0 ? `${candidates.length} braucht dich heute` : "alles im Griff"}.`;
+        : needsYouCount === 0
+          ? `${itemCount === 1 ? "Ein Punkt" : `${itemCount} Punkte`} auf dem Radar — nichts Dringendes.`
+          : needsYouCount === 1
+            ? `${itemCount === 1 ? "Ein Eintrag" : `${itemCount} Einträge`} — einer braucht dich heute.`
+            : `${itemCount} Einträge, ${needsYouCount} brauchen dich heute.`;
 
     return {
       triageId: `triage-mock-${day}`,
