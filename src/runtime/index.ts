@@ -7,16 +7,18 @@ import { createPool, databaseUrlFromEnv, type Db } from "../platform/db/pool.js"
 import { migrateUp } from "../platform/db/migrate.js";
 import { clockFromEnv, type Clock } from "../platform/scheduler/clock.js";
 import { ConsumerRunner } from "../platform/events/consumers.js";
-import { MockModel } from "../platform/model/mock-model.js";
+import { createModelFromEnv } from "../platform/model/factory.js";
 import { createPerceptionConsumer } from "../contexts/perception/index.js";
 import { createIdentityConsumer } from "../contexts/identity/index.js";
 import { createMemoryConsumer } from "../contexts/memory/index.js";
 import { createSituationConsumer, SituationService } from "../contexts/situation/index.js";
-import { createDeliberationConsumer } from "../contexts/deliberation/index.js";
+import { createDeliberationConsumer, produceTriage } from "../contexts/deliberation/index.js";
 import { createExecutionConsumer } from "../contexts/execution/index.js";
 import { InteractionService } from "../contexts/interaction/index.js";
 import type { Situation } from "../contracts/situation.js";
 import type { Interaction } from "../contracts/interaction.js";
+import type { ModelPort } from "../contracts/model.js";
+import type { SituationView } from "../contracts/situation.js";
 
 export type Runtime = {
   situation: Situation;
@@ -33,6 +35,8 @@ export type RuntimeOptions = {
   calendarIcsUrl?: string;
   /** Directory of RFC 822 .eml files (AIOS_EMAIL_EML_DIR). Set → real email adapter. */
   emailEmlDir?: string;
+  /** Optional override model (for tests). Default: createModelFromEnv(). */
+  model?: ModelPort;
 };
 
 export async function createRuntime(opts: RuntimeOptions = {}): Promise<Runtime> {
@@ -43,6 +47,7 @@ export async function createRuntime(opts: RuntimeOptions = {}): Promise<Runtime>
   const fixturesDir = opts.fixturesDir ?? path.join(process.cwd(), "fixtures");
   const calendarIcsUrl = opts.calendarIcsUrl ?? process.env.AIOS_CALENDAR_ICS_URL;
   const emailEmlDir = opts.emailEmlDir ?? process.env.AIOS_EMAIL_EML_DIR;
+  const model = opts.model ?? createModelFromEnv(process.env);
 
   const runner = new ConsumerRunner(db);
   runner.register(createPerceptionConsumer(db, clock, { fixturesDir, calendarIcsUrl, emailEmlDir }));
@@ -53,12 +58,20 @@ export async function createRuntime(opts: RuntimeOptions = {}): Promise<Runtime>
   runner.register(createExecutionConsumer(db, clock));
 
   const situation = new SituationService(db, clock);
+
+  // Wire produceTriage as a closure (avoids cross-context import from Interaction)
+  const produceTriageFn = async (view: SituationView): Promise<void> => {
+    await produceTriage(db, clock, view, model);
+    await runner.pump(); // fold triage event into Situation
+  };
+
   const interaction = new InteractionService({
     db,
     clock,
     situation,
-    model: new MockModel(),
+    model,
     pump: () => runner.pump(),
+    produceTriage: produceTriageFn,
   });
 
   return {

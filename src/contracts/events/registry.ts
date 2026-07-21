@@ -82,6 +82,72 @@ export const eventSchemas = {
     day: z.string(),
     horizon: horizonSchema,
     recommendationCount: z.number().int(),
+    // spec-0004: additive optional — tracks which items were presented
+    presentedItemIds: z.array(z.string()).optional(),
+  }),
+
+  // spec-0004: triage judgment emitted by Deliberation
+  "deliberation.triage.created@1": z.object({
+    triageId: z.string(),
+    day: z.string(),
+    openingLine: z.string(),
+    needsYou: z
+      .array(
+        z.object({
+          itemId: z.string(),
+          reason: z.string(),
+          citedPriorityIds: z.array(z.string()),
+        }),
+      )
+      .max(3),
+    decideFirst: z
+      .object({ itemId: z.string(), reason: z.string() })
+      .optional(),
+    changed: z.array(z.object({ itemId: z.string(), change: z.string() })),
+    blocked: z.array(
+      z.object({
+        itemId: z.string(),
+        whoseMove: z.enum(["your_move", "not_your_move"]),
+      }),
+    ),
+    ignorable: z.object({
+      count: z.number().int(),
+      summary: z.string(),
+      itemIds: z.array(z.string()),
+    }),
+    disagreement: z
+      .object({
+        itemId: z.string(),
+        recommendation: z.string(),
+        impactComparison: z.string(),
+      })
+      .optional(),
+    question: z.string().optional(),
+    blindSpots: z.array(z.string()),
+    modelId: z.string(),
+  }),
+
+  // spec-0004: user-stated priority (cited by triage with provenance)
+  "deliberation.priority.stated@1": z.object({
+    priorityId: z.string(),
+    text: z.string(),
+    scope: z.enum(["day", "week", "month"]),
+    sourceEventId: z.string(), // id of interaction.user.responded that caused it
+  }),
+
+  // spec-0004: user override of a triage judgment
+  "deliberation.override.recorded@1": z.object({
+    itemId: z.string(),
+    kind: z.enum(["promote", "ignore", "ignore_permanent", "disagree_overruled"]),
+    sourceEventId: z.string(),
+  }),
+
+  // spec-0004: every verb in the conversation loop emits this
+  "interaction.user.responded@1": z.object({
+    day: z.string(),
+    verb: z.string(),
+    itemId: z.string().optional(),
+    text: z.string().optional(),
   }),
 } as const;
 

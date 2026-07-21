@@ -12,6 +12,7 @@ import type {
   Situation,
   SituationView,
 } from "../../contracts/situation.js";
+import type { TriagePayload } from "../../contracts/deliberation.js";
 
 const OBSERVATION_KINDS = ["calendar", "email", "github"];
 
@@ -87,6 +88,53 @@ async function fold(db: Db, event: StoredEvent, publish: boolean): Promise<void>
       changed.push({ itemId: recId, kind: "recommendation", status: "done" });
       changed.push({ itemId: doneId, kind: "completion", status: "done" });
     }
+  } else if (event.type === "deliberation.triage.created") {
+    // spec-0004: fold triage into triage_current projection
+    const p = event.payload as TriagePayload;
+    await db.query(
+      `INSERT INTO triage_current (day, triage_id, payload, recorded_at)
+       VALUES ($1, $2, $3, $4)
+       ON CONFLICT (day) DO UPDATE SET triage_id = EXCLUDED.triage_id, payload = EXCLUDED.payload, recorded_at = EXCLUDED.recorded_at`,
+      [p.day, p.triageId, JSON.stringify(p), at],
+    );
+  } else if (event.type === "interaction.briefing.delivered") {
+    // spec-0004: fold presentedItemIds into item_seen projection
+    const p = event.payload;
+    const day = p.day as string;
+    const presentedItemIds = (p.presentedItemIds as string[] | undefined) ?? [];
+    for (const itemId of presentedItemIds) {
+      await db.query(
+        `INSERT INTO item_seen (item_id, day, presented_at)
+         VALUES ($1, $2, $3)
+         ON CONFLICT (item_id, day) DO NOTHING`,
+        [itemId, day, at],
+      );
+    }
+  } else if (event.type === "deliberation.priority.stated") {
+    // spec-0004: fold priorities into priorities table
+    const p = event.payload;
+    await db.query(
+      `INSERT INTO priorities (priority_id, text, scope, source_event_id, recorded_at)
+       VALUES ($1, $2, $3, $4, $5)
+       ON CONFLICT (priority_id) DO NOTHING`,
+      [p.priorityId, p.text, p.scope, p.sourceEventId, at],
+    );
+  } else if (event.type === "deliberation.override.recorded") {
+    // spec-0004: fold overrides — update situation_items for ignore_permanent
+    const p = event.payload;
+    const day = at.slice(0, 10);
+    await db.query(
+      `INSERT INTO overrides (item_id, kind, source_event_id, day, recorded_at)
+       VALUES ($1, $2, $3, $4, $5)
+       ON CONFLICT (item_id, day, kind) DO NOTHING`,
+      [p.itemId, p.kind, p.sourceEventId, day, at],
+    );
+    if (p.kind === "ignore_permanent") {
+      await db.query(
+        `UPDATE situation_items SET status = 'ignored', updated_at = $2 WHERE id = $1`,
+        [p.itemId, at],
+      );
+    }
   }
 
   if (publish) {
@@ -123,6 +171,21 @@ export class SituationService implements Situation {
     const res = await this.db.query(`SELECT * FROM situation_items ORDER BY id`);
     const rows = res.rows;
 
+    // Load seen-state for items
+    const seenRes = await this.db.query(`SELECT item_id, day, presented_at FROM item_seen ORDER BY item_id, day DESC`);
+    const seenMap = new Map<string, string>(); // itemId -> latest presentedAt
+    for (const r of seenRes.rows) {
+      if (!seenMap.has(r.item_id)) {
+        seenMap.set(r.item_id, parseIso(r.presented_at as string).toISOString());
+      }
+    }
+
+    // Load permanently ignored items
+    const ignoredRes = await this.db.query(
+      `SELECT item_id FROM overrides WHERE kind = 'ignore_permanent'`,
+    );
+    const permanentlyIgnored = new Set<string>(ignoredRes.rows.map((r: { item_id: string }) => r.item_id));
+
     const items = rows
       .filter((r) => OBSERVATION_KINDS.includes(r.kind))
       .filter((r) => (horizon === "today" ? r.horizon === "today" : true))
@@ -136,6 +199,8 @@ export class SituationService implements Situation {
         entityIds: (r.entity_ids as string[]).slice().sort(),
         sourceEventId: Number(r.source_event_id),
         updatedAt: (r.updated_at as Date).toISOString(),
+        lastPresentedAt: seenMap.get(r.id as string),
+        permanentlyIgnored: permanentlyIgnored.has(r.id as string),
       }))
       .sort((a, b) => {
         const ka = `${a.occursAt ?? "9999"}|${a.id}`;
@@ -167,12 +232,36 @@ export class SituationService implements Situation {
         detail: r.payload.detail as string,
       }));
 
+    // Load latest triage for today
+    const today = this.clock.now().toISOString().slice(0, 10);
+    const triageRes = await this.db.query(
+      `SELECT payload FROM triage_current WHERE day = $1`,
+      [today],
+    );
+    const triage: TriagePayload | undefined = triageRes.rows[0]
+      ? (triageRes.rows[0].payload as TriagePayload)
+      : undefined;
+
+    // Load recorded priorities
+    const prioRes = await this.db.query(
+      `SELECT priority_id, text, scope, source_event_id, recorded_at FROM priorities ORDER BY recorded_at`,
+    );
+    const priorities = prioRes.rows.map((r) => ({
+      priorityId: r.priority_id as string,
+      text: r.text as string,
+      scope: r.scope as "day" | "week" | "month",
+      sourceEventId: r.source_event_id as string,
+      recordedAt: parseIso(r.recorded_at as string).toISOString(),
+    }));
+
     return {
       asOf: this.clock.now().toISOString(),
       items,
       recommendations,
       coverage,
       completions,
+      triage,
+      priorities,
     };
   }
 }

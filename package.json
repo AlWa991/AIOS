@@ -17,6 +17,7 @@
     "aios": "node dist/apps/cli/index.js"
   },
   "dependencies": {
+    "@anthropic-ai/sdk": "^0.112.4",
     "fastify": "^5.2.0",
     "mailparser": "^3.9.14",
     "node-ical": "^0.27.0",

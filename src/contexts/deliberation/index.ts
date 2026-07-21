@@ -1,5 +1,6 @@
 import { readFileSync } from "node:fs";
 import path from "node:path";
+import { randomUUID } from "node:crypto";
 import type { Db } from "../../platform/db/pool.js";
 import type { Clock } from "../../platform/scheduler/clock.js";
 import {
@@ -11,6 +12,8 @@ import {
 import type { Consumer } from "../../platform/events/consumers.js";
 import type { Recommendation } from "../../contracts/deliberation.js";
 import type { ActionRequest } from "../../contracts/execution.js";
+import type { ModelPort } from "../../contracts/model.js";
+import type { SituationView } from "../../contracts/situation.js";
 
 type GoalFixture = { id: string; title: string; keywords: string[] };
 
@@ -30,6 +33,46 @@ export async function rebuildGoals(db: Db): Promise<void> {
   for (const e of events) {
     if (e.type === "deliberation.goal.created") await upsertGoal(db, e.payload);
   }
+}
+
+/**
+ * Produce a triage judgment from the current SituationView and emit it as an event.
+ * Called from InteractionService.brief() before rendering — ADR-0017.
+ */
+export async function produceTriage(
+  db: Db,
+  clock: Clock,
+  situation: SituationView,
+  model: ModelPort,
+): Promise<void> {
+  const day = situation.asOf.slice(0, 10);
+
+  // Check if triage already produced for today (idempotent)
+  const existingTriage = await findEvents(db, "deliberation.triage.created");
+  if (existingTriage.some((e) => (e.payload.day as string) === day)) {
+    return; // Already produced today — idempotent
+  }
+
+  // Get previously presented item IDs for delta computation
+  const briefingEvents = await findEvents(db, "interaction.briefing.delivered");
+  const lastBriefing = briefingEvents
+    .filter((e) => (e.payload.day as string) !== day) // Only past briefings for delta
+    .at(-1);
+  const lastPresentedItemIds = lastBriefing
+    ? ((lastBriefing.payload.presentedItemIds as string[] | undefined) ?? [])
+    : [];
+
+  const triage = await model.triage({
+    day,
+    situationView: situation,
+    lastPresentedItemIds,
+  });
+
+  // Ensure day and triageId are correct (model may have set them, override to be safe)
+  triage.day = day;
+  if (!triage.triageId) triage.triageId = `triage-${day}-${randomUUID().slice(0, 8)}`;
+
+  await appendEvent(db, "deliberation.triage.created", 1, clock.now(), triage);
 }
 
 /** Rule-based recommender v1: deadline proximity x goal linkage (ADR-0014). */
