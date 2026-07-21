@@ -1,7 +1,7 @@
 ---
-status: draft
+status: approved
 owner: alex
-last_updated: 2026-07-20
+last_updated: 2026-07-21
 ---
 
 # Spec: Vertical Slice 4 — The First Morning
@@ -9,7 +9,14 @@ last_updated: 2026-07-20
 - **Experience doc (drives this spec):** [../00-product/experience/first-morning.md](../00-product/experience/first-morning.md)
 - **Architecture doc:** [../10-architecture/domain-model.md](../10-architecture/domain-model.md)
 - **Constraining ADRs:** 0004 (cognitive load = primary criterion), 0014 (goal hierarchy, traceability invariant), 0016 (TS core), 0017 (Situation = sole read surface, recommendations folded back), 0018 (slice review)
-- **Approved:** pending
+- **Approved:** by Alex 2026-07-21 ("Spec-0004 is approved"), with directives:
+  (1) "no memory, no claim" everywhere — incomplete beats hallucinating; if no
+  provenance, AIOS says it doesn't know; (2) optimize for the first 30 seconds,
+  not for passing tests; (3) success metric = Alex instinctively stops opening
+  Outlook first; (4) real data wherever possible; (5) architecture evolves only
+  because reality demands it — document genuine limitations, resist
+  convenience-driven changes. After this slice: live with AIOS before adding
+  more capabilities.
 
 ## Purpose & Scope
 
