@@ -144,13 +144,36 @@ Product (the actual bar):
 3. Daily `.eml` supply: manual export acceptable for now, or defer email to
    fixture for the first real mornings? (No new integration in this slice.)
 
-## Slice Review (ADR-0018) — to be completed after implementation
+## Slice Review (ADR-0018) — implementation 2026-07-21, commits 07b481c…900cffb
 
-1. **New user capability:** the first morning conversation — triage with
-   reasons, safe-to-ignore, honest blind spots, memory citations with
-   provenance, disagreement with impact comparison.
-2. **Architecture learning (expected, verify):** does the frozen
-   architecture bear product pressure — recommendation fold (ADR-0017) at
-   full briefing scale; first real model through the MAL seam; where
-   seen-state naturally lives (Situation projection vs Memory); whether
-   goal linkage (ADR-0014) is needed earlier than planned.
+1. **New user capability:** the first morning conversation. `aios brief` is
+   an interactive German dialogue: triage with per-item reasons, one
+   decide-first, delta since the last presented briefing, safe-to-ignore
+   collapsed, honest blind spots, memory citations with provenance,
+   disagreement with impact comparison, conversation verbs that become
+   learning events. 72/72 tests, container proof green. Product acceptance
+   (3 real mornings, 30-second verdict) still OPEN — awaits live data.
+2. **Architecture learnings (actual):**
+   - **The frozen architecture held.** Zero diffs in Perception, Identity,
+     Execution, Memory; registry additive-only; zero convenience-driven
+     architecture changes were needed.
+   - **Cross-context wiring belongs to the composition root:** Interaction
+     must never import Deliberation; `produceTriage` is injected as a
+     closure from the runtime. Correct tension, correctly placed.
+   - **Seen-state lives in Situation** (confirmed): `item_seen` projection
+     folded from `interaction.briefing.delivered` — observable state all
+     surfaces need, not episodic Memory.
+   - **MAL seam bore its first typed method:** `triage(req)` beside
+     `complete()`; the required import chain stays contracts-only. Real
+     model is env-switched; tests never touch the network.
+   - **Provenance must be enforced, then verified:** the first
+     implementation fabricated `sourceEventId`s (random UUIDs instead of
+     stored event ids) — precisely the "no memory, no claim" failure mode,
+     invisible to all green tests. Caught only by independent spec review;
+     fixed in 900cffb with an end-to-end provenance test. Lesson on
+     record: trust-critical invariants need adversarial verification, a
+     passing suite is not evidence.
+   - **Goal linkage (ADR-0014):** not yet forced; `prio` statements are
+     the bootstrap. Revisit after real mornings.
+3. **Did any bounded context become weaker?** No. Interaction grew the
+   conversation loop and renderer — watch its size in future slices.
