@@ -21,11 +21,17 @@ services:
     depends_on:
       postgres:
         condition: service_healthy
+    env_file:
+      - .env
     environment:
       DATABASE_URL: postgres://aios:aios@postgres:5432/aios
       PORT: "3000"
       # spec-0003: real email adapter reads the baked-in sample .eml set
       AIOS_EMAIL_EML_DIR: /app/fixtures/sample-emails
+      # spec-0004: real model behind MAL — env-injected from .env (gitignored)
+      AIOS_MODEL: ${AIOS_MODEL:-}
+      ANTHROPIC_API_KEY: ${ANTHROPIC_API_KEY:-}
+      AIOS_CALENDAR_ICS_URL: ${AIOS_CALENDAR_ICS_URL:-}
     ports:
       - "3000:3000"
     healthcheck:
