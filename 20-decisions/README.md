@@ -45,3 +45,4 @@ one thing future AI sessions cannot reconstruct from code or structure.
 | [0017](adr-0017-situation-model-as-sole-read-surface.md) | Situation Model as the sole read surface for all interfaces | accepted | 2026-07-19 |
 | [0018](adr-0018-slice-review-two-questions.md) | Every vertical slice must answer two questions | accepted | 2026-07-20 |
 | [0019](adr-0019-identity-owns-semantic-recognition.md) | Perception owns syntax; Identity owns meaning | accepted | 2026-07-20 |
+| [0020](adr-0020-living-phase-trust-before-intelligence.md) | Living phase — usage over building; trust before intelligence | accepted | 2026-07-21 |

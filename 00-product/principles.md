@@ -57,6 +57,15 @@ The user states outcomes; the system decomposes, schedules, delegates, and
 tracks. Task management is system-internal machinery, not the user interface.
 *Violation:* interfaces centered on to-do lists the user must groom.
 
+### P8 — Trust before intelligence
+Whenever AIOS must choose between sounding smart and being honest, honesty
+wins. An occasionally incomplete AIOS beats an occasionally hallucinating one.
+Concrete rules live in the [Trust Invariants register](trust-invariants.md)
+("no memory, no claim" is the first); new invariants discovered in real usage
+are documented there as they appear ([ADR-0020](../20-decisions/adr-0020-living-phase-trust-before-intelligence.md)).
+*Violation:* any confident claim the system cannot support with provenance or
+observation.
+
 ---
 
 ## Architecture Principles
