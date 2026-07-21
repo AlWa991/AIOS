@@ -126,8 +126,7 @@ Antworte NUR mit validem JSON (kein Markdown, keine Erklärung) in diesem Format
   "ignorable": {"count": 0, "summary": "...", "itemIds": []},
   "disagreement": {"itemId": "...", "recommendation": "...", "impactComparison": "..."},
   "question": "...",
-  "blindSpots": ["..."],
-  "modelId": "${req.situationView.asOf}"
+  "blindSpots": ["..."]
 }
 
 Lasse "decideFirst", "disagreement" und "question" weg wenn nicht zutreffend.`;

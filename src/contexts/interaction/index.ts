@@ -268,12 +268,13 @@ export async function runConversationLoop(
   deps: Deps,
   view: SituationView,
   triage: TriagePayload | undefined,
+  inputStream?: NodeJS.ReadableStream,
 ): Promise<void> {
   const { db, clock, pump } = deps;
   const day = view.asOf.slice(0, 10);
 
   const rl = readline.createInterface({
-    input: process.stdin,
+    input: inputStream ?? process.stdin,
     output: process.stdout,
     terminal: false,
   });
@@ -281,14 +282,16 @@ export async function runConversationLoop(
   const needsYou = triage?.needsYou ?? [];
   let disagreementStated = false;
 
-  const responded = async (verb: string, itemId?: string, text?: string) => {
-    await appendEvent(db, "interaction.user.responded", 1, clock.now(), {
+  /** Appends interaction.user.responded, pumps, and returns the real stored event id. */
+  const responded = async (verb: string, itemId?: string, text?: string): Promise<string> => {
+    const stored = await appendEvent(db, "interaction.user.responded", 1, clock.now(), {
       day,
       verb,
       ...(itemId !== undefined && { itemId }),
       ...(text !== undefined && { text }),
     });
     await pump();
+    return String(stored.id);
   };
 
   for await (const line of rl) {
@@ -333,8 +336,7 @@ export async function runConversationLoop(
       const n = parseInt(ignorierDauerhaft[1]!) - 1;
       const item = needsYou[n];
       if (!item) { process.stdout.write(`(Punkt ${ignorierDauerhaft[1]!} nicht gefunden)\n`); continue; }
-      const responseId = `resp-${randomUUID().slice(0, 8)}`;
-      await responded("ignorier_dauerhaft", item.itemId, input);
+      const responseId = await responded("ignorier_dauerhaft", item.itemId, input);
       await appendEvent(db, "deliberation.override.recorded", 1, clock.now(), {
         itemId: item.itemId,
         kind: "ignore_permanent",
@@ -346,8 +348,7 @@ export async function runConversationLoop(
       const n = parseInt(ignorier[1]!) - 1;
       const item = needsYou[n];
       if (!item) { process.stdout.write(`(Punkt ${ignorier[1]!} nicht gefunden)\n`); continue; }
-      const responseId = `resp-${randomUUID().slice(0, 8)}`;
-      await responded("ignorier", item.itemId, input);
+      const responseId = await responded("ignorier", item.itemId, input);
       await appendEvent(db, "deliberation.override.recorded", 1, clock.now(), {
         itemId: item.itemId,
         kind: "ignore",
@@ -359,8 +360,7 @@ export async function runConversationLoop(
       const n = parseInt(wichtiger[1]!) - 1;
       const item = needsYou[n];
       if (!item) { process.stdout.write(`(Punkt ${wichtiger[1]!} nicht gefunden)\n`); continue; }
-      const responseId = `resp-${randomUUID().slice(0, 8)}`;
-      await responded("wichtiger", item.itemId, input);
+      const responseId = await responded("wichtiger", item.itemId, input);
       await appendEvent(db, "deliberation.override.recorded", 1, clock.now(), {
         itemId: item.itemId,
         kind: "promote",
@@ -370,9 +370,8 @@ export async function runConversationLoop(
       process.stdout.write(`(Priorität erhöht)\n`);
     } else if (prioMatch) {
       const text = (prioMatch[1]!).trim();
-      const responseId = `resp-${randomUUID().slice(0, 8)}`;
       const priorityId = `prio-${randomUUID().slice(0, 8)}`;
-      await responded("prio", undefined, text);
+      const responseId = await responded("prio", undefined, text);
       await appendEvent(db, "deliberation.priority.stated", 1, clock.now(), {
         priorityId,
         text,
@@ -385,13 +384,12 @@ export async function runConversationLoop(
       const n = parseInt(widerspruch[1]!) - 1;
       const item = needsYou[n];
       if (!item) { process.stdout.write(`(Punkt ${widerspruch[1]!} nicht gefunden)\n`); continue; }
-      await responded("widerspruch", item.itemId, input);
+      const responseId = await responded("widerspruch", item.itemId, input);
       if (triage?.disagreement && !disagreementStated) {
         disagreementStated = true;
         process.stdout.write(
           `${triage.disagreement.recommendation} — ${triage.disagreement.impactComparison}\nDu entscheidest.\n`,
         );
-        const responseId = `resp-${randomUUID().slice(0, 8)}`;
         await appendEvent(db, "deliberation.override.recorded", 1, clock.now(), {
           itemId: item.itemId,
           kind: "disagree_overruled",

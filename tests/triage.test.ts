@@ -7,6 +7,7 @@
  */
 import path from "node:path";
 import { fileURLToPath } from "node:url";
+import { Readable } from "node:stream";
 import { afterAll, beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
 import { createRuntime, type Runtime } from "../src/runtime/index.js";
 import { SimClock } from "../src/platform/scheduler/clock.js";
@@ -15,10 +16,13 @@ import type { ModelPort, TriageRequest } from "../src/contracts/model.js";
 import type { TriagePayload } from "../src/contracts/deliberation.js";
 import { eventSchemas } from "../src/contracts/events/registry.js";
 import { findEvents, appendEvent } from "../src/platform/events/event-log.js";
-import { enforceProvenance } from "../src/contexts/interaction/index.js";
+import { enforceProvenance, runConversationLoop } from "../src/contexts/interaction/index.js";
 import { buildFallbackTriage } from "../src/platform/model/anthropic-model.js";
 import { MockModel } from "../src/platform/model/mock-model.js";
 import { freshDb, resetDb, SIM_NOW } from "./helpers.js";
+import { ConsumerRunner } from "../src/platform/events/consumers.js";
+import { createSituationConsumer, SituationService } from "../src/contexts/situation/index.js";
+import { produceTriage } from "../src/contexts/deliberation/index.js";
 
 const DIR = path.dirname(fileURLToPath(import.meta.url));
 const FIXTURES_DIR = path.join(DIR, "..", "fixtures");
@@ -129,6 +133,59 @@ describe("triage contract (spec-0004)", () => {
     expect(fallback.modelId).toBe("test-model");
     const parsed = triageSchema.safeParse(fallback);
     expect(parsed.success).toBe(true);
+  });
+
+  it("schema rejects needsYou length 4 (≤3 cap is structural)", () => {
+    // Proves the max(3) constraint is enforced at the schema level, not just in MockModel
+    const result = triageSchema.safeParse({
+      triageId: "t-cap",
+      day: "2026-07-19",
+      openingLine: "Test",
+      needsYou: [
+        { itemId: "a", reason: "r", citedPriorityIds: [] },
+        { itemId: "b", reason: "r", citedPriorityIds: [] },
+        { itemId: "c", reason: "r", citedPriorityIds: [] },
+        { itemId: "d", reason: "r", citedPriorityIds: [] },
+      ],
+      changed: [],
+      blocked: [],
+      ignorable: { count: 0, summary: "none", itemIds: [] },
+      blindSpots: [],
+      modelId: "mock",
+    });
+    expect(result.success).toBe(false);
+  });
+
+  it("schema rejects decideFirst as an array (must be object or absent)", () => {
+    const result = triageSchema.safeParse({
+      triageId: "t-decide",
+      day: "2026-07-19",
+      openingLine: "Test",
+      needsYou: [],
+      decideFirst: [{ itemId: "a", reason: "r" }, { itemId: "b", reason: "r" }],
+      changed: [],
+      blocked: [],
+      ignorable: { count: 0, summary: "none", itemIds: [] },
+      blindSpots: [],
+      modelId: "mock",
+    });
+    expect(result.success).toBe(false);
+  });
+
+  it("schema rejects question as an array (must be string or absent)", () => {
+    const result = triageSchema.safeParse({
+      triageId: "t-question",
+      day: "2026-07-19",
+      openingLine: "Test",
+      needsYou: [],
+      changed: [],
+      blocked: [],
+      ignorable: { count: 0, summary: "none", itemIds: [] },
+      question: ["What should I do?", "Or this?"],
+      blindSpots: [],
+      modelId: "mock",
+    });
+    expect(result.success).toBe(false);
   });
 });
 
@@ -289,37 +346,72 @@ describe("conversation verbs (spec-0004)", () => {
     await db.end();
   });
 
-  it("prio verb emits deliberation.priority.stated with provenance", async () => {
-    const day = SIM_NOW.slice(0, 10);
+  it("prio verb emits deliberation.priority.stated with provenance (end-to-end)", async () => {
+    // Drive the actual conversation loop with a piped prio command.
+    // This proves the real stored event id (not a fake resp-UUID) is used as sourceEventId.
     const clock = new SimClock(SIM_NOW);
+    const view = await runtime.situation.current("today");
+    const triage = view.triage;
 
-    // Emit the events directly as the conversation loop would
-    await appendEvent(db, "interaction.user.responded", 1, clock.now(), {
-      day,
-      verb: "prio",
-      text: "AIOS is my highest priority this month",
-    });
-    await appendEvent(db, "deliberation.priority.stated", 1, clock.now(), {
-      priorityId: "prio-test-001",
-      text: "AIOS is my highest priority this month",
-      scope: "month",
-      sourceEventId: "resp-test-001",
-    });
+    const runner = new ConsumerRunner(db);
+    runner.register(createSituationConsumer(db));
+    const deps = {
+      db,
+      clock,
+      situation: new SituationService(db, clock),
+      model: new MockModel(),
+      pump: () => runner.pump(),
+      produceTriage: async (v: typeof view) => {
+        await produceTriage(db, clock, v, new MockModel());
+        await runner.pump();
+      },
+    };
+
+    // Pipe a single "prio ..." line then EOF
+    const input = Readable.from(["prio AIOS is my highest priority this week\n"]);
+    await runConversationLoop(deps, view, triage, input);
+
+    // After the loop: both events should be in the log
+    const respondedEvents = await findEvents(db, "interaction.user.responded");
+    const prioResponded = respondedEvents.find((e) => e.payload.verb === "prio");
+    expect(prioResponded).toBeDefined();
 
     const prioEvents = await findEvents(db, "deliberation.priority.stated");
     expect(prioEvents.length).toBeGreaterThan(0);
-    expect(prioEvents[0]!.payload.text).toBe("AIOS is my highest priority this month");
-    expect(prioEvents[0]!.payload.priorityId).toBeTruthy();
-    expect(prioEvents[0]!.payload.sourceEventId).toBeTruthy();
+    const prioEvent = prioEvents.at(-1)!;
+    expect(prioEvent.payload.text).toBe("AIOS is my highest priority this week");
+    expect(prioEvent.payload.priorityId).toBeTruthy();
+
+    // Core provenance assertion: sourceEventId must be the real stored id of the
+    // interaction.user.responded event that caused this deliberation event.
+    const sourceId = prioEvent.payload.sourceEventId as string;
+    expect(sourceId).toBeTruthy();
+    const resolvedSource = respondedEvents.find((e) => String(e.id) === sourceId);
+    expect(resolvedSource).toBeDefined();
+    expect(resolvedSource!.type).toBe("interaction.user.responded");
+    expect(resolvedSource!.payload.verb).toBe("prio");
+
+    // The priority can be cited by triage and provenance survives enforceProvenance
+    await runner.pump(); // fold priority into SituationView
+    const viewAfter = await runtime.situation.current("today");
+    const knownPrio = viewAfter.priorities.find(
+      (p) => p.priorityId === (prioEvent.payload.priorityId as string),
+    );
+    expect(knownPrio).toBeDefined();
+    const needsYouWithCitation = [
+      { itemId: "item-x", reason: "r", citedPriorityIds: [knownPrio!.priorityId] },
+    ];
+    const enforced = enforceProvenance(needsYouWithCitation, viewAfter, SIM_NOW.slice(0, 10));
+    expect(enforced[0]!.citedPriorityIds).toContain(knownPrio!.priorityId);
   });
 
   it("prio event is visible in SituationView.priorities after briefGerman pump", async () => {
     // briefGerman() triggers pump → folds priority events into the projection
     await runtime.interaction.briefGerman();
     const view = await runtime.situation.current("today");
-    // The priority stated above should now be in view.priorities
+    // The priority stated via conversation loop in the previous test should be visible
     expect(view.priorities.length).toBeGreaterThan(0);
-    expect(view.priorities[0]!.text).toBe("AIOS is my highest priority this month");
+    expect(view.priorities[0]!.text).toBe("AIOS is my highest priority this week");
   });
 
   it("ignorier verb emits deliberation.override.recorded with kind=ignore", async () => {
@@ -401,26 +493,63 @@ describe("conversation verbs (spec-0004)", () => {
 // 5. Next-day delta: triage shows changed items
 // ─────────────────────────────────────────────────────────────────────────────
 
+const DAY2_NOW = "2026-07-20T06:00:00.000Z";
+
 describe("next-day delta (spec-0004)", () => {
-  it("MockModel marks all items as changed when no previous presentation", async () => {
+  it("day-1 items already presented are NOT in changed; new day-2 item IS in changed", async () => {
     const db = await freshDb();
     try {
-      const runtime = await createRuntime({
+      // ── Day 1 ──────────────────────────────────────────────────────────────
+      const day1Runtime = await createRuntime({
         db,
         clock: new SimClock(SIM_NOW),
         fixturesDir: FIXTURES_DIR,
         model: new MockModel(),
       });
-      await runtime.interaction.startDay();
-      const brief = await runtime.interaction.briefGerman();
-      const view = await runtime.situation.current("today");
+      await day1Runtime.interaction.startDay();
+      await day1Runtime.interaction.briefGerman();
 
-      // On first day, no previous presentation — MockModel marks items as changed
-      expect(view.triage).toBeDefined();
-      // All items are "new" since no previous briefing
-      const presentedCount = view.items.length;
-      if (presentedCount > 0) {
-        expect(view.triage!.changed.length).toBeGreaterThanOrEqual(0);
+      // Brief delivered: presentedItemIds now recorded for day 1
+      const day1Briefings = await findEvents(db, "interaction.briefing.delivered");
+      const day1Briefing = day1Briefings.find((e) => e.payload.day === SIM_NOW.slice(0, 10));
+      expect(day1Briefing).toBeDefined();
+      const day1Presented = (day1Briefing!.payload.presentedItemIds as string[]) ?? [];
+      expect(day1Presented.length).toBeGreaterThan(0); // fixtures loaded, at least one item
+
+      // ── Insert a day-2-only item directly into situation_items ─────────────
+      const newItemId = "si-calendar-new-day2-item";
+      await db.query(
+        `INSERT INTO situation_items (id, kind, horizon, status, entity_ids, source_event_id, payload, updated_at)
+         VALUES ($1, 'calendar', 'today', 'open', '{}', 9999, $2, $3)
+         ON CONFLICT (id) DO NOTHING`,
+        [
+          newItemId,
+          JSON.stringify({ title: "New Day-2 Meeting", body: "", occursAt: "2026-07-20T09:00:00Z", from: null }),
+          new Date(DAY2_NOW).toISOString(),
+        ],
+      );
+
+      // ── Day 2 ──────────────────────────────────────────────────────────────
+      const day2Runtime = await createRuntime({
+        db,
+        clock: new SimClock(DAY2_NOW),
+        fixturesDir: FIXTURES_DIR,
+        model: new MockModel(),
+      });
+      // Start day 2 (fixture adapter re-upserts same fixture items)
+      await day2Runtime.interaction.startDay();
+      await day2Runtime.interaction.briefGerman();
+
+      const day2View = await day2Runtime.situation.current("today");
+      expect(day2View.triage).toBeDefined();
+      const changed = day2View.triage!.changed;
+
+      // The new item (not in day-1 presentedItemIds) must appear in changed
+      expect(changed.map((c) => c.itemId)).toContain(newItemId);
+
+      // Items that were presented on day 1 must NOT appear in changed
+      for (const presentedId of day1Presented) {
+        expect(changed.map((c) => c.itemId)).not.toContain(presentedId);
       }
     } finally {
       await db.end();
